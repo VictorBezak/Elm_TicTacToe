@@ -1,7 +1,7 @@
 module PlaySpace exposing (cells)
 
-import Array exposing (..)
+import Array exposing (Array, repeat)
 
-cells : Array Int
+cells : Array String
 cells =
-    Array.repeat 9 0
+    repeat 9 ""
