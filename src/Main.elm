@@ -11,17 +11,18 @@ import PlaySpace
 -- MODEL
 
 {-
-    We could add a Tuple for type Player, where we hold both players.
+    We could add a Tuple to the Model schema for type Player,
+    where we store the information for both players.
 
     type alias Player =
         { username: String
-        , winRecord: Tuple Int
+        , winRecord: Tuple Int  --(Win, Loss, Draw)
         , level: Int
         }
 
-    OR
+    AND
 
-    type PlayerAction
+    type Conclusion
         = Won Player
         | Lost Player
         | Draw
@@ -69,7 +70,7 @@ renderCell content =
 
 type Msg
     = CellClicked String
-    | GameOver String
+    | GameOver Conclusion
 
 update : Msg -> Model -> Model
 update msg game =
