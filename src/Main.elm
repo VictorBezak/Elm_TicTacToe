@@ -26,7 +26,11 @@ type alias Model =
     , status : String
     }
 
+-- temporarily hardcoded
+-- will remove if account creating is enabled
+testPlayer1 : Player
 testPlayer1 = Player "DevDood" 12 0 0 0
+testPlayer2 : Player
 testPlayer2 = Player "DevDino" 8 0 0 0
 
 model : Model
@@ -45,14 +49,14 @@ view : Model -> Html Msg
 view game =
     let
         player1 = game.player1
-        p1_wins = "Wins:   " ++ String.fromInt( game.player1.wins )
-        p1_losses = "Losses: " ++ String.fromInt( game.player1.losses )
-        p1_draws = "Draws:  " ++ String.fromInt( game.player1.draws )
+        p1_wins = "Wins:   " ++ String.fromInt game.player1.wins
+        p1_losses = "Losses: " ++ String.fromInt game.player1.losses
+        p1_draws = "Draws:  " ++ String.fromInt game.player1.draws
 
         player2 = game.player2
-        p2_wins = "Wins:   " ++ String.fromInt( game.player2.wins )
-        p2_losses = "Losses: " ++ String.fromInt( game.player2.losses )
-        p2_draws = "Draws:  " ++ String.fromInt( game.player2.draws )
+        p2_wins = "Wins:   " ++ String.fromInt game.player2.wins
+        p2_losses = "Losses: " ++ String.fromInt game.player2.losses
+        p2_draws = "Draws:  " ++ String.fromInt game.player2.draws
     in
     
     div [ id "container" ]
@@ -88,14 +92,9 @@ view game =
 
 -- UPDATE
 
-type Conclusion
-    = Victory
-    | Draw
-
 type Msg
     = CellClicked Int
-    | GameOver Conclusion
-    -- | ResetGame
+    | ResetGame
 
 update : Msg -> Model -> Model
 update msg game =
@@ -105,7 +104,13 @@ update msg game =
                 |> setCell cell
                 |> updateGameStatus
 
+        ResetGame ->
+            -- reset game status to "game in progress"
+            -- reset game.cells to all ""
+            game
 
+
+-- The remaining functions are all helper functions
 setCell :  Int -> Model -> Model
 setCell cell game =
     if game.activePlayer == game.player1 then
@@ -113,10 +118,10 @@ setCell cell game =
     else
         { game | cells = set cell "O" game.cells }
 
-
 updateGameStatus : Model -> Model
 updateGameStatus game =
     let
+        -- variables in this 'cell' block == cell contents : String
         a1 = cell_A1 game
         a2 = cell_A2 game
         a3 = cell_A3 game
@@ -130,7 +135,7 @@ updateGameStatus game =
         victory : Bool
         victory =
             -- Horizontal Win Conditions
-            if      (a1 /= "") && (a1 == a2) && (a2 == a3) then True
+            if (a1 /= "") && (a1 == a2) && (a2 == a3) then True
             else if (b1 /= "") && (b1 == b2) && (b2 == b3) then True
             else if (c1 /= "") && (c1 == c2) && (c2 == c3) then True
             -- Vertical Win Conditions
@@ -142,7 +147,7 @@ updateGameStatus game =
             else if (a3 /= "") && (a3 == b2) && (b2 == c1) then True
             -- No Victory
             else False
-
+        
         emptyCellList : List String
         emptyCellList =
             List.filter String.isEmpty (Array.toList game.cells)
@@ -150,7 +155,7 @@ updateGameStatus game =
         draw : Bool
         draw =
             if List.length emptyCellList == 0 then True else False
-    
+        
     in
         if draw then
             game
@@ -158,18 +163,17 @@ updateGameStatus game =
                 |> updateDraws game.player2
                 |> gameOverMessage "draw"
 
-        else if victory then
-            if game.activePlayer == game.player1 then
-                winner = game.player1
-                loser = game.player2
+        else if victory then    
+            if game.activePlayer == game.player1 then        
+                game
+                    |> updateWins game.player1
+                    |> updateLosses game.player2
+                    |> gameOverMessage "victory"
             else
-                winner = game.player2
-                loser = game.player1
-            
-            game
-                |> updateWins winner
-                |> updateLosses loser
-                |> gameOverMessage "victory"
+                game
+                    |> updateWins game.player2
+                    |> updateLosses game.player1
+                    |> gameOverMessage "victory"
 
         else
             if game.player1 == game.activePlayer then
@@ -177,60 +181,36 @@ updateGameStatus game =
             else
                 { game | activePlayer = game.player1 }
 
+updatePlayer : Player -> Model -> Model
+updatePlayer updatedPlayer game =
+    if updatedPlayer.username == game.player1.username then
+        { game | player1 = updatedPlayer }
+    else
+        { game | player2 = updatedPlayer }
 
--- updatePlayerDraws : Model -> Model
--- updatePlayerDraws game =
---     game
---         |> sdPlayerIn
---             ( game.player1
---         |> incrementDraws game.player2
-
--- asPlayerIn : Player -> Model -> Player
--- asPlayerIn player game =
---     { game | player1 = }
-
--- incrementDraws : Player -> Model -> Model
--- incrementDraws player game =
---     case player.draws of
---         Just val ->
---             { player | draws = player.draws + 1 }
---         Nothing ->
---             player
-
-
-updatePlayerWinsLosses : Model -> Model
-updatePlayerWinsLosses game =
-    let
-        player1 = game.player1
-        player2 = game.player2
-        winner = game.activePlayer
-
-    in
-        if player1 == winner then
-            incrementWins player1
-            incrementLosses player2
-        
-        else
-            incrementWins player2
-            incrementLosses player1
-
+incrementDraws : Player -> Player
+incrementDraws player =
+    { player | draws = player.draws + 1 }
 
 incrementWins : Player -> Player
 incrementWins player =
-    case player.wins of
-        Just val ->
-            { player | wins = player.wins + 1 }
-        Nothing ->
-            player
-
+    { player | wins = player.wins + 1 }
 
 incrementLosses : Player -> Player
 incrementLosses player =
-    case player.losses of
-        Just val ->
-            { player | losses = player.losses + 1 }
-        Nothing ->
-            player
+    { player | losses = player.losses + 1 }
+
+updateDraws : Player -> Model -> Model
+updateDraws player =
+    updatePlayer <| incrementDraws player
+
+updateWins : Player -> Model -> Model
+updateWins player =
+    updatePlayer <| incrementWins player
+
+updateLosses : Player -> Model -> Model
+updateLosses player =
+    updatePlayer <| incrementLosses player
 
 gameOverMessage : String -> Model -> Model
 gameOverMessage conclusion game =
@@ -244,13 +224,13 @@ viewGameOverMessage game =
     else if game.status == "draw" then
         section [ id "DrawMessage" ]
             [ p [] [ text "It's a draw!" ]
-            , button [ class "playAgainBtn" ] [ text "Play Again?" ]
+            , button [ onClick ResetGame, class "playAgainBtn" ] [ text "Play Again?" ]
             ]
     
     else
         section [ id "VictoryMessage" ]
-            [ p [] [ text game.activePlayer ++ " Won the Game!" ]
-            , button [ class "playAgainBtn" ] [ text "Play Again?" ]
+            [ p [] [ text (game.activePlayer.username ++ " Won the Game!") ]
+            , button [ onClick ResetGame, class "playAgainBtn" ] [ text "Play Again?" ]
             ]
 
 
