@@ -1,7 +1,25 @@
 module PlaySpace exposing (..)
 
 import Array exposing (Array, repeat, get)
-import Main exposing (Model)
+
+
+type alias Player =
+    { username : String
+    , level : Int
+    , wins : Int
+    , losses : Int
+    , draws : Int
+    }
+
+type alias Model =
+    { cells : Array String
+    , player1 : Player
+    , player2 : Player
+    , activePlayer : Player
+    , status : String
+    }
+
+
 
 cells : Array String
 cells =
@@ -78,3 +96,39 @@ cell_C3 game =
             content
         Nothing ->
             ""
+
+
+
+updatePlayer : (Player -> Player) -> Model -> Model
+updatePlayer updated model =
+    { model | player = updated model.player }
+
+
+
+updateDraws : Player -> Model -> Model
+updateDraws =
+    ( updatePlayer <| incrementDraws player1 )
+
+incrementDraws : Player -> Player
+incrementDraws player =
+    { player | draws = player.draws + 1 }
+
+
+
+updateWins : Player -> Model -> Model
+updateWins =
+    ( updatePlayer <| incrementWins player1 )
+
+incrementWins : Player -> Player
+incrementWins player =
+    { player | wins = player.wins + 1 }
+
+
+
+updateLosses : Player -> Model -> Model
+updateLosses =
+    ( updatePlayer <| incrementLosses player1 )
+
+incrementLosses : Player -> Player
+incrementLosses player =
+    { player | losses = player.losses + 1 }
