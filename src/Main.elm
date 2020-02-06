@@ -1,4 +1,4 @@
-module Main exposing (main)
+module Main exposing (main, Model)
 
 import Array exposing (..)
 import Browser
@@ -12,156 +12,64 @@ import PlaySpace
 
 type alias Player =
     { username : String
-    , winLossRecord : Array Int --(Win, Loss, Draw)
     , level : Int
+    , wins : Int
+    , losses : Int
+    , draws : Int
     }
 
 type alias Model =
     { cells : Array String
-    , players : (Player, Player)
-    , activePlayerId : Int
-    , winnerId : Int
-    , draw : Bool
-    , description : String
+    , player1 : Player
+    , player2 : Player
+    , activePlayer : Player
+    , status : String
     }
 
-testPlayer1 = Player "DevDood" (Array.fromList [0, 0, 0]) 12
-testPlayer2 = Player "DevDino" (Array.fromList [0, 0, 0]) 8
+testPlayer1 = Player "DevDood" 12 0 0 0
+testPlayer2 = Player "DevDino" 8 0 0 0
 
 model : Model
 model =
     { cells = PlaySpace.cells
-    , players = (testPlayer1, testPlayer2)
-    , activePlayerId = 1
-    , winnerId = 0
-    , draw = False
-    , description = ""
+    , player1 = testPlayer1
+    , player2 = testPlayer2
+    , activePlayer = testPlayer1
+    , status = "game in progress"
     }
 
 
 -- VIEW
 
-{-
-    OnClick
--}
-
 view : Model -> Html Msg
 view game =
     let
-        cell_A1 =
-            case (get 0 game.cells) of
-                Just content ->
-                    content
-                Nothing ->
-                    ""
-        cell_A2 =
-            case (get 1 game.cells) of
-                Just content ->
-                    content
-                Nothing ->
-                    ""
-        cell_A3 =
-            case (get 2 game.cells) of
-                Just content ->
-                    content
-                Nothing ->
-                    ""
-        cell_B1 =
-            case (get 3 game.cells) of
-                Just content ->
-                    content
-                Nothing ->
-                    ""
-        cell_B2 =
-            case (get 4 game.cells) of
-                Just content ->
-                    content
-                Nothing ->
-                    ""
-        cell_B3 =
-            case (get 5 game.cells) of
-                Just content ->
-                    content
-                Nothing ->
-                    ""
-        cell_C1 =
-            case (get 6 game.cells) of
-                Just content ->
-                    content
-                Nothing ->
-                    ""
-        cell_C2 =
-            case (get 7 game.cells) of
-                Just content ->
-                    content
-                Nothing ->
-                    ""
-        cell_C3 =
-            case (get 8 game.cells) of
-                Just content ->
-                    content
-                Nothing ->
-                    ""
+        p1_wins = "Wins:   " ++ String.fromInt( game.player1.wins )
+        p1_losses = "Losses: " ++ String.fromInt( game.player1.losses )
+        p1_draws = "Draws:  " ++ String.fromInt( game.player1.draws )
 
-        player1 = Tuple.first game.players
-        player2 = Tuple.second game.players
-
-        p1_wins =
-            case (get 0 player1.winLossRecord) of
-                Just wins ->
-                    String.fromInt( wins )
-                Nothing ->
-                    "NA"
-
-        p1_losses =
-            case (get 1 player1.winLossRecord) of
-                Just losses ->
-                    String.fromInt( losses )
-                Nothing ->
-                    "NA"
-        p1_draws =
-            case (get 2 player1.winLossRecord) of
-                Just draws ->
-                    String.fromInt( draws )
-                Nothing ->
-                    "NA"
-
-        p2_wins =
-            case (get 0 player2.winLossRecord) of
-                Just wins ->
-                    String.fromInt( wins )
-                Nothing ->
-                    "NA"
-        p2_losses =
-            case (get 1 player2.winLossRecord) of
-                Just losses ->
-                    String.fromInt( losses )
-                Nothing ->
-                    "NA"
-        p2_draws =
-            case (get 2 player2.winLossRecord) of
-                Just draws ->
-                    String.fromInt( draws )
-                Nothing ->
-                    "NA"
+        p2_wins = "Wins:   " ++ String.fromInt( game.player2.wins )
+        p2_losses = "Losses: " ++ String.fromInt( game.player2.losses )
+        p2_draws = "Draws:  " ++ String.fromInt( game.player2.draws )
     in
     
     div [ id "container" ]
         [ header [ id "title" ] [ text "Tic-Tac-Toe" ]
-        , main_ [ id "playspace" ]
-            [ button [ onClick (CellClicked 0) ] [ text cell_A1 ]
-            , button [ onClick (CellClicked 1) ] [ text cell_A2 ]
-            , button [ onClick (CellClicked 2) ] [ text cell_A3 ]
-            , button [ onClick (CellClicked 3) ] [ text cell_B1 ]
-            , button [ onClick (CellClicked 4) ] [ text cell_B2 ]
-            , button [ onClick (CellClicked 5) ] [ text cell_B3 ]
-            , button [ onClick (CellClicked 6) ] [ text cell_C1 ]
-            , button [ onClick (CellClicked 7) ] [ text cell_C2 ]
-            , button [ onClick (CellClicked 8) ] [ text cell_C3 ]
+        , section [ id "playspace" ]
+            [ button [ onClick (CellClicked 0) ] [ text (cell_A1 game) ]
+            , button [ onClick (CellClicked 1) ] [ text (cell_A2 game) ]
+            , button [ onClick (CellClicked 2) ] [ text (cell_A3 game) ]
+            , button [ onClick (CellClicked 3) ] [ text (cell_B1 game) ]
+            , button [ onClick (CellClicked 4) ] [ text (cell_B2 game) ]
+            , button [ onClick (CellClicked 5) ] [ text (cell_B3 gane) ]
+            , button [ onClick (CellClicked 6) ] [ text (cell_C1 game) ]
+            , button [ onClick (CellClicked 7) ] [ text (cell_C2 game) ]
+            , button [ onClick (CellClicked 8) ] [ text (cell_C3 gane) ]
             ]
+        , showGameOverMessage
         , footer [ id "footer" ]
             [ div [ id "player1" ]
-                [ h2 [ class "playerName" ] [ text player1.username ] 
+                [ h2 [ class "playerName" ] [ text player1.username ]
                 , p [ class "playerRecord" ] [ text p1_wins ]
                 , p [ class "playerRecord" ] [ text p1_losses ]
                 , p [ class "playerRecord" ] [ text p1_draws ]
@@ -179,8 +87,7 @@ view game =
 -- UPDATE
 
 type Conclusion
-    = Won Player
-    | Lost Player
+    = Victory Int
     | Draw
 
 type Msg
@@ -190,93 +97,152 @@ type Msg
 
 update : Msg -> Model -> Model
 update msg game =
-    -- HOW DO WE PROPERLY UPDATE THE CELL CONTENTS VALUE?
     case msg of
         CellClicked cell ->
-            if game.activePlayerId == 1 then
-                { game | cells = set cell "X" game.cells
-                , activePlayerId = ( modBy 2 game.activePlayerId ) + 1
-                }
-            else
-                { game | cells = set cell "O" game.cells
-                , activePlayerId = ( modBy 2 game.activePlayerId ) + 1
-                }
+            game
+                |> setCell cell
+                |> updateGameStatus
 
         GameOver conclusion ->
             case conclusion of
-                Won player ->
-                    let
-                        record = player.winLossRecord
-                        wins = get 0 record
-
-                    in
-                        case wins of
-                            Just val ->
-                                player val
-                                    |> setWins
-                                    -- |> setWinnerId
-
-                        
-                            Nothing ->
-                                game
-                        
-                Lost player ->
-                    let
-                        record = player.winLossRecord
-                        losses = get 1 record
-
-                    in
-                        case losses of
-                            Just val ->
-                                { player | winLossRecord = set 1 (val  + 1) record }
-                
-                            Nothing ->
-                                game
-
                 Draw ->
-                    let
-                        player1 = Tuple.first game.players
-                        player2 = Tuple.second game.players
+                    game
+                        |> updatePlayerDraws
+                        |> updateGameStatus "draw"
 
-                        record1 = player1.winLossRecord
-                        record2 = player2.winLossRecord
+                Victory ->
+                    game
+                        |> updatePlayerWinsLosses
+                        |> updateGameStatus "victory"
 
-                        draws1 = get 2 record1
-                        draws2 = get 2 record2
+
+setCell :  Int -> Model -> Model
+setCell cell game =
+    if game.activePlayer == game.player1 then
+        { game | cells = set cell "X" game.cells }
+    else
+        { game | cells = set cell "O" game.cells }
 
 
-                    in
-                        case draws1 of
-                            Just val ->
-                                { player1 | winLossRecord = set 2 (val  + 1) record1 }
-                
-                            Nothing ->
-                                game
+updateGameStatus : Model -> Model
+updateGameStatus game =
+    let
+        a1 = cell_A1 game
+        a2 = cell_A2 game
+        a3 = cell_A3 game
+        b1 = cell_B1 game
+        b2 = cell_B2 game
+        b3 = cell_B3 game
+        c1 = cell_C1 game
+        c2 = cell_C2 game
+        c3 = cell_C3 game
 
-                        -- case draws2 of
-                        --     Just val ->
-                        --         { player2 | winLossRecord = set 2 (val  + 1) record2 }
-                
-                        --     Nothing ->
-                        --         game
+        victory : Bool
+        victory =
+            -- Horizontal Win Conditions
+            if      (a1 != "") && (a1 == a2 == a3) then True
+            else if (b1 != "") && (b1 == b2 == b3) then True
+            else if (c1 != "") && (c1 == c2 == c3) then True
+            -- Vertical Win Conditions
+            else if (a1 != "") && (a1 == b1 == c1) then True
+            else if (a2 != "") && (a2 == b2 == c2) then True
+            else if (a3 != "") && (a3 == b3 == c3) then True
+            -- Diagonal Win Conditions
+            else if (a1 != "") && (a1 == b2 == c3) then True
+            else if (a3 != "") && (a3 == b2 == c1) then True
+            -- No Victory
+            else False
 
-setWins : Player -> Int -> Array Int -> Player
-setWins player oldVal record =
-    { player | winLossRecord = set 0 (oldVal  + 1) record }
+        emptyCellList : List String
+        emptyCellList =
+            List.filter String.isEmpty (Array.toList game.cells)
 
-setLosses : Player -> Int -> Array Int -> Player
-setLosses player oldVal record =
-    { player | winLossRecord = set 1 (oldVal  + 1) record }
+        draw : Bool
+        draw =
+            if List.length emptyCellList == 0 then True else False
+    
+    in
+        if draw then Draw
+        else if victory then Victory
 
-setDraws : Player -> Int -> Array Int -> Player
-setDraws player oldVal record =
-    { player | winLossRecord = set 2 (oldVal  + 1) record }
+        else
+            if game.player1 == game.activePlayer then
+                { game | activePlayer = game.player2 }
+            else
+                { game | activePlayer = game.player1 }
 
-setWinnerId : Model -> Player -> Model
-setWinnerId game player =
-    { game | winnerId = game.activePlayerId
-    , description = player.username ++ " Won the Game!"
-    }
+
+updatePlayerDraws : Model -> Model
+updatePlayerDraws game =
+    updateDraws game.player1
+    updateDraws game.player2
+
+
+updatePlayerWinsLosses : Model -> Model
+updatePlayerWinsLosses game =
+    let
+        player1 = game.player1
+        player2 = game.player2
+        winner = game.activePlayer
+
+    in
+        if player1 == winner then
+            updateWins player1
+            updateLosses player2
+        
+        else
+            updateWins player2
+            updateLosses player1
+
+
+updateDraws : Player -> Player
+updateDraws player =
+    case player.draws of
+        Just val ->
+            { player | draws = player.draws + 1 }
+        Nothing ->
+            player
+
+
+updateWins : Player -> Player
+updateWins player =
+    case player.wins of
+        Just val ->
+            { player | wins = player.wins + 1 }
+        Nothing ->
+            player
+
+
+updateLosses : Player -> Player
+updateLosses player =
+    case player.losses of
+        Just val ->
+            { player | losses = player.losses + 1 }
+        Nothing ->
+            player
+
+
+updateGameStatus : String Model -> Model
+updateGameStatus conclusion game =
+    { game | status = conclusion }
+
+
+gameOverMessage : Model -> Html Msg
+gameOverMessage game =
+    if game.status == "game in progress" then
+        section [] []
+    
+    else if game.status == "draw" then
+        div [ id "DrawMessage" ]
+            [ p [] [ text "It's a draw!" ]
+            , button [ class "playAgainBtn" ] [ text "Play Again?" ]
+            ]
+    
+    else
+        div [ id "VictoryMessage" ]
+            [ p [] [ text game.activePlayer ++ " Won the Game!" ]
+            , button [ class "playAgainBtn" ] [ text "Play Again?" ]
+            ]
 
 
 -- INITIALIZE
