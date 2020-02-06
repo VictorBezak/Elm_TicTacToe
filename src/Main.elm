@@ -60,7 +60,23 @@ view game =
     in
     
     div [ id "container" ]
-        [ header [ id "title" ] [ text "Tic-Tac-Toe" ]
+        [ header [ id "header" ]
+            [ h1 [ id "title" ] [ text "Tic-Tac-Toe" ]
+            , div [ id "playerStats" ]
+                [ div [ id "player1" ]
+                    [ h2 [ class "playerName" ] [ text player1.username ]
+                    , p [ class "playerRecord" ] [ text p1_wins ]
+                    , p [ class "playerRecord" ] [ text p1_losses ]
+                    , p [ class "playerRecord" ] [ text p1_draws ]
+                    ]
+                , div [ id "player2" ]
+                    [ h2 [ class "playerName" ] [ text player2.username ]
+                    , p [ class "playerRecord" ] [ text p2_wins ]
+                    , p [ class "playerRecord" ] [ text p2_losses ]
+                    , p [ class "playerRecord" ] [ text p2_draws ]
+                    ]
+                ]
+            ]
         , section [ id "playspace" ]
             [ button [ onClick (CellClicked 0) ] [ text (cell_A1 game) ]
             , button [ onClick (CellClicked 1) ] [ text (cell_A2 game) ]
@@ -73,20 +89,6 @@ view game =
             , button [ onClick (CellClicked 8) ] [ text (cell_C3 game) ]
             ]
         , viewGameOverMessage game
-        , footer [ id "footer" ]
-            [ div [ id "player1" ]
-                [ h2 [ class "playerName" ] [ text player1.username ]
-                , p [ class "playerRecord" ] [ text p1_wins ]
-                , p [ class "playerRecord" ] [ text p1_losses ]
-                , p [ class "playerRecord" ] [ text p1_draws ]
-                ]
-            , div [ id "player2" ]
-                [ h2 [ class "playerName" ] [ text player2.username ]
-                , p [ class "playerRecord" ] [ text p2_wins ]
-                , p [ class "playerRecord" ] [ text p2_losses ]
-                , p [ class "playerRecord" ] [ text p2_draws ]
-                ]
-            ]
         ]
 
 
@@ -105,10 +107,9 @@ update msg game =
                 |> updateGameStatus
 
         ResetGame ->
-            -- reset game status to "game in progress"
-            -- reset game.cells to all ""
             game
-
+                |> resetGameStatus
+                |> resetBoard
 
 -- The remaining functions are all helper functions
 setCell :  Int -> Model -> Model
@@ -153,17 +154,10 @@ updateGameStatus game =
             List.filter String.isEmpty (Array.toList game.cells)
 
         draw : Bool
-        draw =
-            if List.length emptyCellList == 0 then True else False
+        draw = List.length emptyCellList == 0
         
     in
-        if draw then
-            game
-                |> updateDraws game.player1
-                |> updateDraws game.player2
-                |> gameOverMessage "draw"
-
-        else if victory then    
+        if victory then
             if game.activePlayer == game.player1 then        
                 game
                     |> updateWins game.player1
@@ -174,6 +168,12 @@ updateGameStatus game =
                     |> updateWins game.player2
                     |> updateLosses game.player1
                     |> gameOverMessage "victory"
+        
+        else if draw then
+            game
+                |> updateDraws game.player1
+                |> updateDraws game.player2
+                |> gameOverMessage "draw"
 
         else
             if game.player1 == game.activePlayer then
@@ -222,17 +222,31 @@ viewGameOverMessage game =
         section [] []
     
     else if game.status == "draw" then
-        section [ id "DrawMessage" ]
-            [ p [] [ text "It's a draw!" ]
-            , button [ onClick ResetGame, class "playAgainBtn" ] [ text "Play Again?" ]
+        div []
+            [ section [ id "drawMsg" ]
+                [ p [ class "gameOverText" ] [ text "It's a draw!" ]
+                , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
+                ]
+            , div [ id "overlay" ] []
             ]
+        
     
     else
-        section [ id "VictoryMessage" ]
-            [ p [] [ text (game.activePlayer.username ++ " Won the Game!") ]
-            , button [ onClick ResetGame, class "playAgainBtn" ] [ text "Play Again?" ]
+        div []
+            [ section [ id "victoryMsg" ]
+                [ p [ class "gameOverText" ] [ text (game.activePlayer.username ++ " won the game!") ]
+                , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
+                ]
+            , div [ id "overlay" ] []
             ]
 
+resetGameStatus : Model -> Model
+resetGameStatus game =
+    { game | status = "game in progress" }
+
+resetBoard : Model -> Model
+resetBoard game =
+    { game | cells = Array.repeat 9 "" }
 
 -- INITIALIZE
 
