@@ -1,11 +1,11 @@
-module Board exposing (Clickable, Cell, Content, Board, board, showCell, setCell)
+module Board exposing (Content, State, Board, board, showCell, setCell)
 
 import Player exposing (Player)
 
 
 -- Players and Model schemas were copied here to
 -- satisfy definitions for our setCell function
-type Players
+type PlayerTurn
     = Player1
     | Player2
 
@@ -13,8 +13,7 @@ type alias Model =
     { board : Board
     , player1 : Player
     , player2 : Player
-    , playerTurn : Players
-    -- , status : Status
+    , playerTurn : PlayerTurn
     }
 
 type Content
@@ -22,69 +21,53 @@ type Content
     | X
     | O
 
-type Clickable
+type State
     = Active
     | Inactive
 
-type Cell
-    = A1
-    | A2
-    | A3
-    | B1
-    | B2
-    | B3
-    | C1
-    | C2
-    | C3
-
 type alias Board =
-    { a1 : { id : Cell, content : Content, clickable : Clickable }
-    , a2 : { id : Cell, content : Content, clickable : Clickable }
-    , a3 : { id : Cell, content : Content, clickable : Clickable }
-    , b1 : { id : Cell, content : Content, clickable : Clickable }
-    , b2 : { id : Cell, content : Content, clickable : Clickable }
-    , b3 : { id : Cell, content : Content, clickable : Clickable }
-    , c1 : { id : Cell, content : Content, clickable : Clickable }
-    , c2 : { id : Cell, content : Content, clickable : Clickable }
-    , c3 : { id : Cell, content : Content, clickable : Clickable }
+    { a1 : { content : Content, state : State }
+    , a2 : { content : Content, state : State }
+    , a3 : { content : Content, state : State }
+    , b1 : { content : Content, state : State }
+    , b2 : { content : Content, state : State }
+    , b3 : { content : Content, state : State }
+    , c1 : { content : Content, state : State }
+    , c2 : { content : Content, state : State }
+    , c3 : { content : Content, state : State }
     }
 
     
 board : Board
 board =
-    { a1 = { id = A1, content = Empty, clickable = Active }
-    , a2 = { id = A2, content = Empty, clickable = Active }
-    , a3 = { id = A3, content = Empty, clickable = Active }
-    , b1 = { id = B1, content = Empty, clickable = Active }
-    , b2 = { id = B2, content = Empty, clickable = Active }
-    , b3 = { id = B3, content = Empty, clickable = Active }
-    , c1 = { id = C1, content = Empty, clickable = Active }
-    , c2 = { id = C2, content = Empty, clickable = Active }
-    , c3 = { id = C3, content = Empty, clickable = Active }
+    { a1 = { content = Empty, state = Active }
+    , a2 = { content = Empty, state = Active }
+    , a3 = { content = Empty, state = Active }
+    , b1 = { content = Empty, state = Active }
+    , b2 = { content = Empty, state = Active }
+    , b3 = { content = Empty, state = Active }
+    , c1 = { content = Empty, state = Active }
+    , c2 = { content = Empty, state = Active }
+    , c3 = { content = Empty, state = Active }
     }
 
-showCell : Cell -> String
-showCell cell =
-    let
-        case cell of
-            
+showCell : Content -> String
+showCell content =
+    case content of
+        Empty ->
+            ""
 
-    in
-        case content of
-            Empty ->
-                ""
+        X ->
+            "X"
 
-            X ->
-                "X"
+        O ->
+            "O"
 
-            O ->
-                "O"
-
-setCell : Cell -> Model -> Cell
+setCell : { contents : Content, state : State } -> Model -> { contents : Content, state : State }
 setCell cell game =
     case game.playerTurn of
         Player1 ->
-            cell X Inactive
+            { cell | contents = X, state = Inactive }
 
         Player2 ->
-            cell O Inactive
+            { cell | contents = O, state = Inactive }

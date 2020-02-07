@@ -25,7 +25,6 @@ type alias Model =
     , player1 : Player
     , player2 : Player
     , playerTurn : Players
-    -- , status : Status
     }
 
 -- temporarily hardcoded
@@ -41,7 +40,6 @@ model =
     , player1 = testPlayer1
     , player2 = testPlayer2
     , playerTurn = Player1
-    -- , status = InProgress
     }
 
 
@@ -60,7 +58,15 @@ view game =
         p2_losses = "Losses: " ++ showStat player2.losses
         p2_draws = "Draws:  " ++ showStat player2.draws
 
-        board = game.board
+        a1 = board.a1
+        a2 = board.a2
+        a3 = board.a3
+        b1 = board.b1
+        b2 = board.b2
+        b3 = board.b3
+        c1 = board.c1
+        c2 = board.c2
+        c3 = board.c3
     in
     
     div [ id "container" ]
@@ -82,15 +88,15 @@ view game =
                 ]
             ]
         , section [ id "playspace" ]
-            [ button [ onClick (CellClicked A1) ] [ text (showCell A1) ]
-            , button [ onClick (CellClicked A2) ] [ text (showCell A2) ]
-            , button [ onClick (CellClicked A3) ] [ text (showCell A3) ]
-            , button [ onClick (CellClicked B1) ] [ text (showCell B1) ]
-            , button [ onClick (CellClicked B2) ] [ text (showCell B2) ]
-            , button [ onClick (CellClicked B3) ] [ text (showCell B3) ]
-            , button [ onClick (CellClicked C1) ] [ text (showCell C1) ]
-            , button [ onClick (CellClicked C2) ] [ text (showCell C2) ]
-            , button [ onClick (CellClicked C3) ] [ text (showCell C3) ]
+            [ button [ onClick (CellClicked a1), class a1.state ] [ text (showCell a1.content) ]
+            , button [ onClick (CellClicked a2), class a2.state ] [ text (showCell a2.content) ]
+            , button [ onClick (CellClicked a3), class a3.state ] [ text (showCell a3.content) ]
+            , button [ onClick (CellClicked a1), class a1.state ] [ text (showCell b1.content) ]
+            , button [ onClick (CellClicked a2), class a2.state ] [ text (showCell b2.content) ]
+            , button [ onClick (CellClicked a3), class a3.state ] [ text (showCell b3.content) ]
+            , button [ onClick (CellClicked a1), class a1.state ] [ text (showCell c1.content) ]
+            , button [ onClick (CellClicked a2), class a2.state ] [ text (showCell c2.content) ]
+            , button [ onClick (CellClicked a3), class a3.state ] [ text (showCell c3.content) ]
             ]
         , viewGameOverMessage game
         ]
@@ -99,16 +105,21 @@ view game =
 -- UPDATE
 
 type Msg
-    = CellClicked Cell
+    = CellClicked Board
     | ResetGame
 
 update : Msg -> Model -> Model
 update msg game =
     case msg of
         CellClicked cell ->
-            game
-                |> setCell cell
-                |> checkGameStatus
+            case cell.state of
+                Active ->
+                    game
+                        |> setCell cell
+                        |> checkGameStatus
+
+                Inactive ->
+                    cell
 
         ResetGame ->
             game
