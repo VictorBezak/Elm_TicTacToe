@@ -75,6 +75,14 @@
     filter: contrast(90%);
 }
 
+.active {
+
+}
+
+.inactive {
+    
+}
+
 #overlay {
     width: 100vw;
     height: 100vh;

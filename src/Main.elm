@@ -16,7 +16,7 @@ type Status
     | Victory
     | Draw
 
-type Players
+type PlayerTurn
     = Player1
     | Player2
 
@@ -24,7 +24,8 @@ type alias Model =
     { board : Board
     , player1 : Player
     , player2 : Player
-    , playerTurn : Players
+    , playerTurn : PlayerTurn
+    , status : Status
     }
 
 -- temporarily hardcoded
@@ -40,6 +41,7 @@ model =
     , player1 = testPlayer1
     , player2 = testPlayer2
     , playerTurn = Player1
+    , status = InProgress
     }
 
 
@@ -49,63 +51,63 @@ view : Model -> Html Msg
 view game =
     let
         player1 = game.player1
-        p1_wins = "Wins:   " ++ showStat player1.wins
-        p1_losses = "Losses: " ++ showStat player1.losses
-        p1_draws = "Draws:  " ++ showStat player1.draws
+        p1_wins = "Wins:   " ++ viewStat player1.wins
+        p1_losses = "Losses: " ++ viewStat player1.losses
+        p1_draws = "Draws:  " ++ viewStat player1.draws
 
         player2 = game.player2
-        p2_wins = "Wins:   " ++ showStat player2.wins
-        p2_losses = "Losses: " ++ showStat player2.losses
-        p2_draws = "Draws:  " ++ showStat player2.draws
+        p2_wins = "Wins:   " ++ viewStat player2.wins
+        p2_losses = "Losses: " ++ viewStat player2.losses
+        p2_draws = "Draws:  " ++ viewStat player2.draws
 
-        a1 = board.a1
-        a2 = board.a2
-        a3 = board.a3
-        b1 = board.b1
-        b2 = board.b2
-        b3 = board.b3
-        c1 = board.c1
-        c2 = board.c2
-        c3 = board.c3
-    in
+        a1 = game.board.a1
+        a2 = game.board.a2
+        a3 = game.board.a3
+        b1 = game.board.b1
+        b2 = game.board.b2
+        b3 = game.board.b3
+        c1 = game.board.c1
+        c2 = game.board.c2
+        c3 = game.board.c3
     
-    div [ id "container" ]
-        [ header [ id "header" ]
-            [ h1 [ id "title" ] [ text "Tic-Tac-Toe" ]
-            , div [ id "playerStats" ]
-                [ div [ id "player1" ]
-                    [ h2 [ class "playerName" ] [ text player1.username ]
-                    , p [ class "playerRecord" ] [ text p1_wins ]
-                    , p [ class "playerRecord" ] [ text p1_losses ]
-                    , p [ class "playerRecord" ] [ text p1_draws ]
-                    ]
-                , div [ id "player2" ]
-                    [ h2 [ class "playerName" ] [ text player2.username ]
-                    , p [ class "playerRecord" ] [ text p2_wins ]
-                    , p [ class "playerRecord" ] [ text p2_losses ]
-                    , p [ class "playerRecord" ] [ text p2_draws ]
+    in
+        div [ id "container" ]
+            [ header [ id "header" ]
+                [ h1 [ id "title" ] [ text "Tic-Tac-Toe" ]
+                , div [ id "playerStats" ]
+                    [ div [ id "player1" ]
+                        [ h2 [ class "playerName" ] [ text player1.username ]
+                        , p [ class "playerRecord" ] [ text p1_wins ]
+                        , p [ class "playerRecord" ] [ text p1_losses ]
+                        , p [ class "playerRecord" ] [ text p1_draws ]
+                        ]
+                    , div [ id "player2" ]
+                        [ h2 [ class "playerName" ] [ text player2.username ]
+                        , p [ class "playerRecord" ] [ text p2_wins ]
+                        , p [ class "playerRecord" ] [ text p2_losses ]
+                        , p [ class "playerRecord" ] [ text p2_draws ]
+                        ]
                     ]
                 ]
+            , section [ id "playspace" ]
+                [ button [ onClick (CellClicked a1), class (viewState a1.state) ] [ text (viewContent a1.content) ]
+                , button [ onClick (CellClicked a2), class (viewState a2.state) ] [ text (viewContent a2.content) ]
+                , button [ onClick (CellClicked a3), class (viewState a3.state) ] [ text (viewContent a3.content) ]
+                , button [ onClick (CellClicked b1), class (viewState a1.state) ] [ text (viewContent b1.content) ]
+                , button [ onClick (CellClicked b2), class (viewState a2.state) ] [ text (viewContent b2.content) ]
+                , button [ onClick (CellClicked b3), class (viewState a3.state) ] [ text (viewContent b3.content) ]
+                , button [ onClick (CellClicked c1), class (viewState a1.state) ] [ text (viewContent c1.content) ]
+                , button [ onClick (CellClicked c2), class (viewState a2.state) ] [ text (viewContent c2.content) ]
+                , button [ onClick (CellClicked c3), class (viewState a3.state) ] [ text (viewContent c3.content) ]
+                ]
+            , viewGameOverMessage game
             ]
-        , section [ id "playspace" ]
-            [ button [ onClick (CellClicked a1), class a1.state ] [ text (showCell a1.content) ]
-            , button [ onClick (CellClicked a2), class a2.state ] [ text (showCell a2.content) ]
-            , button [ onClick (CellClicked a3), class a3.state ] [ text (showCell a3.content) ]
-            , button [ onClick (CellClicked a1), class a1.state ] [ text (showCell b1.content) ]
-            , button [ onClick (CellClicked a2), class a2.state ] [ text (showCell b2.content) ]
-            , button [ onClick (CellClicked a3), class a3.state ] [ text (showCell b3.content) ]
-            , button [ onClick (CellClicked a1), class a1.state ] [ text (showCell c1.content) ]
-            , button [ onClick (CellClicked a2), class a2.state ] [ text (showCell c2.content) ]
-            , button [ onClick (CellClicked a3), class a3.state ] [ text (showCell c3.content) ]
-            ]
-        , viewGameOverMessage game
-        ]
 
 
 -- UPDATE
 
 type Msg
-    = CellClicked Board
+    = CellClicked Cell
     | ResetGame
 
 update : Msg -> Model -> Model
@@ -115,73 +117,80 @@ update msg game =
             case cell.state of
                 Active ->
                     game
-                        |> setCell cell
-                        |> checkGameStatus
+                        -- |> updateBoard cell
+                        |> updateGameStatus
 
                 Inactive ->
-                    cell
+                    game
 
         ResetGame ->
             game
                 |> resetGameStatus
                 |> resetBoard
 
+
 -- The remaining functions are all helper functions
-checkGameStatus : Model -> Model
-checkGameStatus game =
-    case (checkForWinDraw game) of
+viewState : State -> String
+viewState state =
+    case state of
+        Active ->
+            "active"
+
+        Inactive ->
+            "inactive"
+
+
+updateGameStatus : Model -> Model
+updateGameStatus game =
+    case checkEndgameConditions game of
         Victory ->
-            if game.playerTurn == Player1 then        
-                game
-                    |> updateWins game.player1
-                    |> updateLosses game.player2
-                    |> setGameStatus Victory
-            else
-                game
-                    |> updateWins game.player2
-                    |> updateLosses game.player1
-                    |> setGameStatus Victory
+            case game.playerTurn of      
+                Player1 ->
+                    game
+                        |> updateWins game.player1
+                        |> updateLosses game.player2
+                        |> setGameStatus Victory
+                        |> viewGameOverMessage
+
+                Player2 ->
+                    game
+                        |> updateWins game.player2
+                        |> updateLosses game.player1
+                        |> setGameStatus Victory
+                        |> viewGameOverMessage
         
         Draw ->
             game
                 |> updateDraws game.player1
                 |> updateDraws game.player2
-                |> gameOverMessage "draw"
-            
+                |> setGameStatus Draw
+                |> viewGameOverMessage
 
         InProgress ->
-            game
-        
-        -- else if draw then
-            -- game
-            --     |> updateDraws game.player1
-            --     |> updateDraws game.player2
-            --     |> gameOverMessage "draw"
-
-        -- else
-        --     case game.playerTurn of
-        --         Player1 ->
-        --             { game | playerTurn = Player2 }
+            case game.playerTurn of
+                Player1 ->
+                    { game | playerTurn = Player2 }
                 
-        --         Player2 ->
-        --             { game | playerTurn = Player1 }
+                Player2 ->
+                    { game | playerTurn = Player1 }
 
-checkForWinDraw : Model -> Status
-checkForWinDraw game =
+
+checkEndgameConditions : Model -> Status
+checkEndgameConditions game =
     let
         board = game.board
 
-        a1 = board.a1
-        a2 = board.a2
-        a3 = board.a3
-        b1 = board.b1
-        b2 = board.b2
-        b3 = board.b3
-        c1 = board.c1
-        c2 = board.c2
-        c3 = board.c3
+        a1 = board.a1.content
+        a2 = board.a2.content
+        a3 = board.a3.content
+        b1 = board.b1.content
+        b2 = board.b2.content
+        b3 = board.b3.content
+        c1 = board.c1.content
+        c2 = board.c2.content
+        c3 = board.c3.content
 
-        emptyCellList : List Cell
+        emptyCellList : List Content
         emptyCellList =
             List.filter Empty [a1, a2, a3, b1, b2, b3, c1, c2, c3]
     
@@ -202,44 +211,10 @@ checkForWinDraw game =
         else InProgress
 
 
-updatePlayer : Player -> Model -> Model
-updatePlayer updatedPlayer game =
-    if updatedPlayer.username == game.player1.username then
-        { game | player1 = updatedPlayer }
-    else
-        { game | player2 = updatedPlayer }
-
-incrementDraws : Player -> Player
-incrementDraws player =
-    { player | draws = player.draws + 1 }
-
-incrementWins : Player -> Player
-incrementWins player =
-    { player | wins = player.wins + 1 }
-
-incrementLosses : Player -> Player
-incrementLosses player =
-    { player | losses = player.losses + 1 }
-
-updateDraws : Player -> Model -> Model
-updateDraws player =
-    updatePlayer <| incrementDraws player
-
-updateWins : Player -> Model -> Model
-updateWins player =
-    updatePlayer <| incrementWins player
-
-updateLosses : Player -> Model -> Model
-updateLosses player =
-    updatePlayer <| incrementLosses player
-
-gameOverMessage : String -> Model -> Model
-gameOverMessage conclusion game =
-    { game | status = conclusion }
-
 setGameStatus : Status -> Model -> Model
 setGameStatus conclusion game =
     { game | status = conclusion }
+
 
 viewGameOverMessage : Model -> Html Msg
 viewGameOverMessage game =
@@ -265,13 +240,11 @@ viewGameOverMessage game =
                 , div [ id "overlay" ] []
                 ]
 
+
 resetGameStatus : Model -> Model
 resetGameStatus game =
-    { game | status = "game in progress" }
+    { game | status = InProgress }
 
-resetBoard : Model -> Model
-resetBoard game =
-    { game | board = Array.repeat 9 "" }
 
 -- INITIALIZE
 

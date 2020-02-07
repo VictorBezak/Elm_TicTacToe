@@ -1,20 +1,40 @@
-module Board exposing (Content, State, Board, board, showCell, setCell)
+module Board exposing (Content(..), State(..), Cell, Board, board, viewContent, setCell, resetBoard)
 
-import Player exposing (Player)
+-- import Player exposing (Player)
 
 
--- Players and Model schemas were copied here to
--- satisfy definitions for our setCell function
+type Status
+    = InProgress
+    | Victory
+    | Draw
+
 type PlayerTurn
     = Player1
     | Player2
+
+type Stats
+    = Level Int
+    | Wins Int
+    | Draws Int
+    | Losses Int
+
+type alias Player =
+    { username : String
+    , level : Stats
+    , wins : Stats
+    , losses : Stats
+    , draws : Stats
+    }
 
 type alias Model =
     { board : Board
     , player1 : Player
     , player2 : Player
     , playerTurn : PlayerTurn
+    , status : Status
     }
+
+---------------------------------------------------------------------
 
 type Content
     = Empty
@@ -25,16 +45,21 @@ type State
     = Active
     | Inactive
 
+type alias Cell =
+    { content : Content
+    , state : State
+    }
+
 type alias Board =
-    { a1 : { content : Content, state : State }
-    , a2 : { content : Content, state : State }
-    , a3 : { content : Content, state : State }
-    , b1 : { content : Content, state : State }
-    , b2 : { content : Content, state : State }
-    , b3 : { content : Content, state : State }
-    , c1 : { content : Content, state : State }
-    , c2 : { content : Content, state : State }
-    , c3 : { content : Content, state : State }
+    { a1 : Cell
+    , a2 : Cell
+    , a3 : Cell
+    , b1 : Cell
+    , b2 : Cell
+    , b3 : Cell
+    , c1 : Cell
+    , c2 : Cell
+    , c3 : Cell
     }
 
     
@@ -51,8 +76,9 @@ board =
     , c3 = { content = Empty, state = Active }
     }
 
-showCell : Content -> String
-showCell content =
+
+viewContent : Content -> String
+viewContent content =
     case content of
         Empty ->
             ""
@@ -63,11 +89,35 @@ showCell content =
         O ->
             "O"
 
-setCell : { contents : Content, state : State } -> Model -> { contents : Content, state : State }
-setCell cell game =
-    case game.playerTurn of
-        Player1 ->
-            { cell | contents = X, state = Inactive }
 
-        Player2 ->
-            { cell | contents = O, state = Inactive }
+-- setCell : Cell -> Model -> Cell
+-- setCell cell game =
+--     case game.playerTurn of
+--         Player1 ->
+--             { cell | content = X, state = Inactive }
+
+--         Player2 ->
+--             { cell | content = O, state = Inactive }
+        
+
+-- updateBoard : Cell -> (Cell -> Model -> Cell) -> Model -> Model
+-- updateBoard cell game =
+--     { game | cell }
+
+-- updateCell : Cell -> Model
+-- updateCell cell =
+--         updateSecondLayer <| setCell cell 
+
+
+resetBoard : Board -> Board
+resetBoard _ =
+    { a1 = { content = Empty, state = Active }
+    , a2 = { content = Empty, state = Active }
+    , a3 = { content = Empty, state = Active }
+    , b1 = { content = Empty, state = Active }
+    , b2 = { content = Empty, state = Active }
+    , b3 = { content = Empty, state = Active }
+    , c1 = { content = Empty, state = Active }
+    , c2 = { content = Empty, state = Active }
+    , c3 = { content = Empty, state = Active }
+    }

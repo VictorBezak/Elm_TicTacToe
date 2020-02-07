@@ -1,25 +1,26 @@
-module Player exposing (Stats, Player, showStat, getStat, updateStat, calculateLevel)
+module Player exposing (..)
 
+type alias TotalExperience = Int
 
 type Stats
-    = Level Int (Maybe Player)
+    = Level Int
     | Wins Int
     | Draws Int
     | Losses Int
 
 type alias Player =
     { username : String
-    , level : Stats
+    , level : Stats 
     , wins : Stats
     , losses : Stats
     , draws : Stats
     }
 
 
-showStat : Stats -> String
-showStat stat =
+viewStat : Stats -> String
+viewStat stat =
     case stat of
-        Level level _ ->
+        Level level ->
             String.fromInt level
 
         Wins wins ->
@@ -31,10 +32,11 @@ showStat stat =
         Draws draws ->
             String.fromInt draws
 
+
 getStat : Stats -> Int
 getStat stat =
     case stat of
-        Level level _ ->
+        Level level ->
             level
 
         Wins wins ->
@@ -46,27 +48,24 @@ getStat stat =
         Draws draws ->
             draws
 
-updateStat : Stats -> Int
-updateStat stat =
-    case stat of
-        Level _ player ->
-            case player of
-                Just experience ->
-                    calculateLevel experience
-                Nothing ->
-                    0
-                
-        Wins wins ->
-            wins + 1
 
-        Losses losses ->
-            losses + 1
+updateWins : Player -> Player
+updateWins player =
+    { player | wins = Wins (getStat player.wins + 1)}
 
-        Draws draws ->
-            draws + 1
 
-calculateLevel : Player -> Int
-calculateLevel player =
+updateLosses : Player -> Player
+updateLosses player =
+    { player | losses = Losses (getStat player.losses + 1)}
+
+
+updateDraws : Player -> Player
+updateDraws player =
+    { player | draws = Draws (getStat player.draws + 1)}
+    
+
+updateLevel : Player -> Player
+updateLevel player =
     let
         winExp =
             getStat player.wins * 25
@@ -81,7 +80,6 @@ calculateLevel player =
             winExp + drawExp + lossExp
     
         playerLevel =
-            (totalExp // 100) + 1  -- Add 1 because players start at lvl 1
+            (totalExp // 100) + 1  
     in
-        playerLevel
-        
+        { player | level = Level playerLevel }
