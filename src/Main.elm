@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Json.Encode exposing (..)
 import Array exposing (Array, set)
 import Browser
 import Html exposing (..)
@@ -7,6 +8,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Board exposing (..)
 import Player exposing (..)
+
 
 
 -- MODEL
@@ -35,14 +37,15 @@ testPlayer1 = Player "DevDood" (Level 1) (Wins 0) (Losses 0) (Draws 0)
 testPlayer2 : Player
 testPlayer2 = Player "DevDino" (Level 1) (Wins 0) (Losses 0) (Draws 0)
 
-model : Model
-model =
+init : Model
+init =
     { board = Board.board
     , player1 = testPlayer1
     , player2 = testPlayer2
     , playerTurn = Player1
     , status = InProgress
     }
+
 
 
 -- VIEW
@@ -125,8 +128,26 @@ update msg game =
 
         ResetGame ->
             game
-                |> resetGameStatus
-                |> resetBoard
+                |> resetGame emptyCells
+
+
+resetGame : Board -> Model -> Model
+resetGame reset game =
+    { game | board = reset, status = InProgress }
+
+
+emptyCells : Board
+emptyCells =
+    { a1 = { content = Empty, state = Active }
+    , a2 = { content = Empty, state = Active }
+    , a3 = { content = Empty, state = Active }
+    , b1 = { content = Empty, state = Active }
+    , b2 = { content = Empty, state = Active }
+    , b3 = { content = Empty, state = Active }
+    , c1 = { content = Empty, state = Active }
+    , c2 = { content = Empty, state = Active }
+    , c3 = { content = Empty, state = Active }
+    }
 
 
 -- The remaining functions are all helper functions
@@ -192,7 +213,7 @@ checkEndgameConditions game =
 
         emptyCellList : List Content
         emptyCellList =
-            List.filter Empty [a1, a2, a3, b1, b2, b3, c1, c2, c3]
+            List.filter (\cell -> cell == Empty) [a1, a2, a3, b1, b2, b3, c1, c2, c3]
     
     in
         -- Horizontal Win Conditions
@@ -234,16 +255,22 @@ viewGameOverMessage game =
         Victory ->
             div []
                 [ section [ id "victoryMsg" ]
-                    [ p [ class "gameOverText" ] [ text (game.activePlayer.username ++ " won the game!") ]
+                    [ p [ class "gameOverText" ] [ text (viewActivePlayer game ++ " won the game!") ]
                     , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
                     ]
                 , div [ id "overlay" ] []
                 ]
 
 
-resetGameStatus : Model -> Model
-resetGameStatus game =
-    { game | status = InProgress }
+viewActivePlayer : Model -> String
+viewActivePlayer game =
+    case game.playerTurn of
+        Player1 ->
+            game.player1.username
+
+        Player2 ->
+            game.player2.username
+
 
 
 -- INITIALIZE
@@ -251,7 +278,7 @@ resetGameStatus game =
 main : Program () Model Msg
 main =
     Browser.sandbox
-        { init = model
+        { init = init
         , view = view
         , update = update
         }

@@ -76,11 +76,11 @@
 }
 
 .active {
-
+    pointer-events: auto;
 }
 
 .inactive {
-    
+    pointer-events: none;
 }
 
 #overlay {

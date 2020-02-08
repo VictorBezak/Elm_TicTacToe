@@ -1,4 +1,10 @@
 module Player exposing (..)
+-- port module Player exposing (..)
+
+-- import Json.Encode as Encode
+
+-- port cache : Encode.Value -> Cmd msg
+
 
 type alias TotalExperience = Int
 
@@ -56,7 +62,10 @@ updateWins player =
 
 updateLosses : Player -> Player
 updateLosses player =
-    { player | losses = Losses (getStat player.losses + 1)}
+    let
+        newValue = getStat player.losses + 1
+    in
+        { player | losses = Losses newValue}
 
 
 updateDraws : Player -> Player

@@ -1,16 +1,9 @@
-module Board exposing (Content(..), State(..), Cell, Board, board, viewContent, setCell, resetBoard)
+module Board exposing (Content(..), State(..), Cell, Board, board, viewContent)
+-- ADD resetGame, emptyCells
 
 -- import Player exposing (Player)
 
 
-type Status
-    = InProgress
-    | Victory
-    | Draw
-
-type PlayerTurn
-    = Player1
-    | Player2
 
 type Stats
     = Level Int
@@ -20,11 +13,20 @@ type Stats
 
 type alias Player =
     { username : String
-    , level : Stats
+    , level : Stats 
     , wins : Stats
     , losses : Stats
     , draws : Stats
     }
+
+type Status
+    = InProgress
+    | Victory
+    | Draw
+
+type PlayerTurn
+    = Player1
+    | Player2
 
 type alias Model =
     { board : Board
@@ -109,15 +111,20 @@ viewContent content =
 --         updateSecondLayer <| setCell cell 
 
 
-resetBoard : Board -> Board
-resetBoard _ =
-    { a1 = { content = Empty, state = Active }
-    , a2 = { content = Empty, state = Active }
-    , a3 = { content = Empty, state = Active }
-    , b1 = { content = Empty, state = Active }
-    , b2 = { content = Empty, state = Active }
-    , b3 = { content = Empty, state = Active }
-    , c1 = { content = Empty, state = Active }
-    , c2 = { content = Empty, state = Active }
-    , c3 = { content = Empty, state = Active }
-    }
+-- resetGame : Board -> Model -> Model
+-- resetGame reset game =
+--     { game | board = reset, status = InProgress }
+
+-- emptyCells : Board
+-- emptyCells =
+--     { a1 = { content = Empty, state = Active }
+--     , a2 = { content = Empty, state = Active }
+--     , a3 = { content = Empty, state = Active }
+--     , b1 = { content = Empty, state = Active }
+--     , b2 = { content = Empty, state = Active }
+--     , b3 = { content = Empty, state = Active }
+--     , c1 = { content = Empty, state = Active }
+--     , c2 = { content = Empty, state = Active }
+--     , c3 = { content = Empty, state = Active }
+--     }
+    
