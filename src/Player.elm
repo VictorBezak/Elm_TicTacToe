@@ -1,26 +1,88 @@
-module Player exposing (..)
+module Player exposing (viewStat, getStat, updateWins, updateLosses, updateDraws)
+
+import Model exposing (Model, PlayerTurn(..), Player, Stats(..))
+-- import Board exposing (Id, Content, State)
 -- port module Player exposing (..)
-
 -- import Json.Encode as Encode
-
 -- port cache : Encode.Value -> Cmd msg
 
+---------------------------------------------------------------------
 
-type alias TotalExperience = Int
+-- FROM Main.elm
+-- type PlayerTurn
+--     = Player1
+--     | Player2
 
-type Stats
-    = Level Int
-    | Wins Int
-    | Draws Int
-    | Losses Int
+-- type Status
+--     = InProgress
+--     | Victory
+--     | Draw
 
-type alias Player =
-    { username : String
-    , level : Stats 
-    , wins : Stats
-    , losses : Stats
-    , draws : Stats
-    }
+-- type alias Model =
+--     { board : Board
+--     , player1 : Player
+--     , player2 : Player
+--     , playerTurn : PlayerTurn
+--     , status : Status
+--     }
+
+---------------------------------------------------------------------
+
+-- FROM Board.elm
+-- type Id
+--     = A1
+--     | A2
+--     | A3
+--     | B1
+--     | B2
+--     | B3
+--     | C1
+--     | C2
+--     | C3
+
+-- type Content
+--     = Empty
+--     | X
+--     | O
+
+-- type State
+--     = Active
+--     | Inactive
+
+-- type alias Cell =
+--     { id : Id
+--     , content : Content
+--     , state : State
+--     }
+
+-- type alias Board =
+--     { a1 : Cell
+--     , a2 : Cell
+--     , a3 : Cell
+--     , b1 : Cell
+--     , b2 : Cell
+--     , b3 : Cell
+--     , c1 : Cell
+--     , c2 : Cell
+--     , c3 : Cell
+--     }
+
+---------------------------------------------------------------------
+
+-- NATIVE
+-- type Stats
+--     = Level Int
+--     | Wins Int
+--     | Draws Int
+--     | Losses Int
+
+-- type alias Player =
+--     { username : String
+--     , level : Stats 
+--     , wins : Stats
+--     , losses : Stats
+--     , draws : Stats
+--     }
 
 
 viewStat : Stats -> String
@@ -38,7 +100,6 @@ viewStat stat =
         Draws draws ->
             String.fromInt draws
 
-
 getStat : Stats -> Int
 getStat stat =
     case stat of
@@ -54,27 +115,48 @@ getStat stat =
         Draws draws ->
             draws
 
-
-updateWins : Player -> Player
+updateWins : Player -> Model -> Model
 updateWins player =
-    { player | wins = Wins (getStat player.wins + 1)}
+    updateModel <| setLevel <| setWins player
 
-
-updateLosses : Player -> Player
+updateLosses : Player -> Model -> Model
 updateLosses player =
-    let
-        newValue = getStat player.losses + 1
-    in
-        { player | losses = Losses newValue}
+    updateModel <| setLevel <| setLosses player
 
-
-updateDraws : Player -> Player
+updateDraws : Player -> Model -> Model
 updateDraws player =
-    { player | draws = Draws (getStat player.draws + 1)}
-    
+    updateModel <| setLevel <| setDraws player
 
-updateLevel : Player -> Player
-updateLevel player =
+---------------------------------------------------------------------
+
+-- Private functions
+-- updateLevel : Player -> Model -> Model
+-- updateLevel player =
+--     updateModel <| setLevel player
+
+updateModel : Player -> Model -> Model
+updateModel player model =
+    case model.playerTurn of
+        Player1 ->
+            { model | player1 = player }
+
+        Player2 ->
+            { model | player2 = player }
+
+setWins : Player -> Player
+setWins player =
+    { player | wins = Wins (getStat player.wins + 1) }
+
+setLosses : Player -> Player
+setLosses player =
+    { player | losses = Losses (getStat player.losses + 1) }
+
+setDraws : Player -> Player
+setDraws player =
+    { player | draws = Draws (getStat player.draws + 1) }
+    
+setLevel : Player -> Player
+setLevel player =
     let
         winExp =
             getStat player.wins * 25

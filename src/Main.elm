@@ -1,34 +1,65 @@
 module Main exposing (main)
 
-import Json.Encode exposing (..)
-import Array exposing (Array, set)
 import Browser
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
+import Html exposing (Html, div, section, header, h1, h2, p, text, button)
+import Html.Attributes exposing (id, class)
+import Html.Events exposing (onClick)
 import Board exposing (..)
 import Player exposing (..)
 
+import Model exposing (Model, PlayerTurn(..), Status(..), Player, Stats(..), Cell, Id(..), Content(..), State(..))
 
+---------------------------------------------------------------------
+
+-- FROM Player.elm
+-- type alias Player =
+--     { username : String
+--     , level : Stats 
+--     , wins : Stats
+--     , losses : Stats
+--     , draws : Stats
+--     }
+
+---------------------------------------------------------------------
+
+-- FROM Board.elm
+-- type alias Cell =
+--     { id : Id
+--     , content : Content
+--     , state : State
+--     }
+
+-- type alias Board =
+--     { a1 : Cell
+--     , a2 : Cell
+--     , a3 : Cell
+--     , b1 : Cell
+--     , b2 : Cell
+--     , b3 : Cell
+--     , c1 : Cell
+--     , c2 : Cell
+--     , c3 : Cell
+--     }
+
+---------------------------------------------------------------------
 
 -- MODEL
+-- type Status
+--     = InProgress
+--     | Victory
+--     | Draw
 
-type Status
-    = InProgress
-    | Victory
-    | Draw
+-- type PlayerTurn
+--     = Player1
+--     | Player2
 
-type PlayerTurn
-    = Player1
-    | Player2
-
-type alias Model =
-    { board : Board
-    , player1 : Player
-    , player2 : Player
-    , playerTurn : PlayerTurn
-    , status : Status
-    }
+-- type alias Model =
+--     { board : Board
+--     , player1 : Player
+--     , player2 : Player
+--     , playerTurn : PlayerTurn
+--     , status : Status
+--     }
 
 -- temporarily hardcoded
 -- will remove if account creating is enabled
@@ -39,7 +70,7 @@ testPlayer2 = Player "DevDino" (Level 1) (Wins 0) (Losses 0) (Draws 0)
 
 init : Model
 init =
-    { board = Board.board
+    { board = Board.emptyBoard
     , player1 = testPlayer1
     , player2 = testPlayer2
     , playerTurn = Player1
@@ -47,9 +78,7 @@ init =
     }
 
 
-
 -- VIEW
-
 view : Model -> Html Msg
 view game =
     let
@@ -107,8 +136,50 @@ view game =
             ]
 
 
--- UPDATE
+viewState : State -> String
+viewState state =
+    case state of
+        Active ->
+            "active"
 
+        Inactive ->
+            "inactive"
+
+viewActivePlayer : Model -> String
+viewActivePlayer game =
+    case game.playerTurn of
+        Player1 ->
+            game.player1.username
+
+        Player2 ->
+            game.player2.username
+
+viewGameOverMessage : Model -> Html Msg
+viewGameOverMessage game =
+    case game.status of
+        InProgress ->
+            section [] []
+    
+        Draw ->
+            div []
+                [ section [ id "drawMsg" ]
+                    [ p [ class "gameOverText" ] [ text "It's a draw!" ]
+                    , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
+                    ]
+                , div [ id "overlay" ] []
+                ]
+        
+        Victory ->
+            div []
+                [ section [ id "victoryMsg" ]
+                    [ p [ class "gameOverText" ] [ text (viewActivePlayer game ++ " won the game!") ]
+                    , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
+                    ]
+                , div [ id "overlay" ] []
+                ]
+
+
+-- UPDATE
 type Msg
     = CellClicked Cell
     | ResetGame
@@ -120,7 +191,7 @@ update msg game =
             case cell.state of
                 Active ->
                     game
-                        -- |> updateBoard cell
+                        |> updateCell game cell
                         |> updateGameStatus
 
                 Inactive ->
@@ -128,37 +199,7 @@ update msg game =
 
         ResetGame ->
             game
-                |> resetGame emptyCells
-
-
-resetGame : Board -> Model -> Model
-resetGame reset game =
-    { game | board = reset, status = InProgress }
-
-
-emptyCells : Board
-emptyCells =
-    { a1 = { content = Empty, state = Active }
-    , a2 = { content = Empty, state = Active }
-    , a3 = { content = Empty, state = Active }
-    , b1 = { content = Empty, state = Active }
-    , b2 = { content = Empty, state = Active }
-    , b3 = { content = Empty, state = Active }
-    , c1 = { content = Empty, state = Active }
-    , c2 = { content = Empty, state = Active }
-    , c3 = { content = Empty, state = Active }
-    }
-
-
--- The remaining functions are all helper functions
-viewState : State -> String
-viewState state =
-    case state of
-        Active ->
-            "active"
-
-        Inactive ->
-            "inactive"
+                |> resetBoard emptyBoard
 
 
 updateGameStatus : Model -> Model
@@ -171,21 +212,18 @@ updateGameStatus game =
                         |> updateWins game.player1
                         |> updateLosses game.player2
                         |> setGameStatus Victory
-                        |> viewGameOverMessage
 
                 Player2 ->
                     game
                         |> updateWins game.player2
                         |> updateLosses game.player1
                         |> setGameStatus Victory
-                        |> viewGameOverMessage
         
         Draw ->
             game
                 |> updateDraws game.player1
                 |> updateDraws game.player2
                 |> setGameStatus Draw
-                |> viewGameOverMessage
 
         InProgress ->
             case game.playerTurn of
@@ -194,7 +232,6 @@ updateGameStatus game =
                 
                 Player2 ->
                     { game | playerTurn = Player1 }
-
 
 checkEndgameConditions : Model -> Status
 checkEndgameConditions game =
@@ -231,50 +268,69 @@ checkEndgameConditions game =
         else if List.length emptyCellList == 0 then Draw
         else InProgress
 
-
 setGameStatus : Status -> Model -> Model
 setGameStatus conclusion game =
     { game | status = conclusion }
 
+-- resetGame : Board -> Model -> Model
+-- resetGame reset game =
+--     { game | board = reset, status = InProgress }
 
-viewGameOverMessage : Model -> Html Msg
-viewGameOverMessage game =
-    case game.status of
-        InProgress ->
-            section [] []
+-- updateWins : Player -> Model -> Model
+-- updateWins player =
+--     updateModel <| setLevel <| setWins player
+
+-- updateLosses : Player -> Model -> Model
+-- updateLosses player =
+--     updateModel <| setLevel <| setLosses player
+
+-- updateDraws : Player -> Model -> Model
+-- updateDraws player =
+--     updateModel <| setLevel <| setDraws player
+
+-- updateModel : Player -> Model -> Model
+-- updateModel player model =
+--     case model.playerTurn of
+--         Player1 ->
+--             { model | player1 = player }
+
+--         Player2 ->
+--             { model | player2 = player }
+
+-- setWins : Player -> Player
+-- setWins player =
+--     { player | wins = Wins (getStat player.wins + 1) }
+
+-- setLosses : Player -> Player
+-- setLosses player =
+--     { player | losses = Losses (getStat player.losses + 1) }
+
+-- setDraws : Player -> Player
+-- setDraws player =
+--     { player | draws = Draws (getStat player.draws + 1) }
     
-        Draw ->
-            div []
-                [ section [ id "drawMsg" ]
-                    [ p [ class "gameOverText" ] [ text "It's a draw!" ]
-                    , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
-                    ]
-                , div [ id "overlay" ] []
-                ]
+-- setLevel : Player -> Player
+-- setLevel player =
+--     let
+--         winExp =
+--             getStat player.wins * 25
+
+--         drawExp =
+--             getStat player.draws * 5
         
-        Victory ->
-            div []
-                [ section [ id "victoryMsg" ]
-                    [ p [ class "gameOverText" ] [ text (viewActivePlayer game ++ " won the game!") ]
-                    , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
-                    ]
-                , div [ id "overlay" ] []
-                ]
+--         lossExp =
+--             getStat player.losses
 
-
-viewActivePlayer : Model -> String
-viewActivePlayer game =
-    case game.playerTurn of
-        Player1 ->
-            game.player1.username
-
-        Player2 ->
-            game.player2.username
-
+--         totalExp =
+--             winExp + drawExp + lossExp
+    
+--         playerLevel =
+--             (totalExp // 100) + 1  
+--     in
+--         { player | level = Level playerLevel }
 
 
 -- INITIALIZE
-
 main : Program () Model Msg
 main =
     Browser.sandbox
