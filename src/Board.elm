@@ -1,4 +1,4 @@
-module Board exposing (viewContent, emptyBoard, resetBoard, updateCell)
+module Board exposing (viewContent, emptyBoard, resetBoard, updateCell, freezeCells)
 
 import Types exposing (Model, PlayerTurn(..), Status(..), Board, Cell, Id(..), Content(..), State(..))
 
@@ -36,6 +36,11 @@ resetBoard reset game =
 updateCell : Model -> Cell -> Model -> Model
 updateCell model cell =
     updateModel <| updateBoard cell <| setCell model
+
+freezeCells : Model -> Model
+freezeCells =
+    freezeGame <| freezeBoard <| freezeCell
+
 
 --------------------------------------------------
 
@@ -82,3 +87,26 @@ setCell game cell =
 
         Player2 ->
             { cell | content = O, state = Inactive }
+
+
+freezeGame : (Board -> Board) -> Model -> Model
+freezeGame freeze game =
+    { game | board = freeze game.board }
+
+freezeBoard : (Cell -> Cell) -> Board -> Board
+freezeBoard freeze board =
+    { board
+    | a1 = freeze board.a1
+    , a2 = freeze board.a2
+    , a3 = freeze board.a3
+    , b1 = freeze board.b1
+    , b2 = freeze board.b2
+    , b3 = freeze board.b3
+    , c1 = freeze board.c1
+    , c2 = freeze board.c2
+    , c3 = freeze board.c3
+    }
+
+freezeCell : Cell -> Cell
+freezeCell cell =
+    { cell | state = Inactive }

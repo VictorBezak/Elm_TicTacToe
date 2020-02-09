@@ -80,6 +80,271 @@ function A9(fun, a, b, c, d, e, f, g, h, i) {
 console.warn('Compiled in DEV mode. Follow the advice at https://elm-lang.org/0.19.1/optimize for better performance and smaller assets.');
 
 
+// EQUALITY
+
+function _Utils_eq(x, y)
+{
+	for (
+		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
+		isEqual && (pair = stack.pop());
+		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
+		)
+	{}
+
+	return isEqual;
+}
+
+function _Utils_eqHelp(x, y, depth, stack)
+{
+	if (x === y)
+	{
+		return true;
+	}
+
+	if (typeof x !== 'object' || x === null || y === null)
+	{
+		typeof x === 'function' && _Debug_crash(5);
+		return false;
+	}
+
+	if (depth > 100)
+	{
+		stack.push(_Utils_Tuple2(x,y));
+		return true;
+	}
+
+	/**/
+	if (x.$ === 'Set_elm_builtin')
+	{
+		x = $elm$core$Set$toList(x);
+		y = $elm$core$Set$toList(y);
+	}
+	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
+	{
+		x = $elm$core$Dict$toList(x);
+		y = $elm$core$Dict$toList(y);
+	}
+	//*/
+
+	/**_UNUSED/
+	if (x.$ < 0)
+	{
+		x = $elm$core$Dict$toList(x);
+		y = $elm$core$Dict$toList(y);
+	}
+	//*/
+
+	for (var key in x)
+	{
+		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+var _Utils_equal = F2(_Utils_eq);
+var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
+
+
+
+// COMPARISONS
+
+// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
+// the particular integer values assigned to LT, EQ, and GT.
+
+function _Utils_cmp(x, y, ord)
+{
+	if (typeof x !== 'object')
+	{
+		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
+	}
+
+	/**/
+	if (x instanceof String)
+	{
+		var a = x.valueOf();
+		var b = y.valueOf();
+		return a === b ? 0 : a < b ? -1 : 1;
+	}
+	//*/
+
+	/**_UNUSED/
+	if (typeof x.$ === 'undefined')
+	//*/
+	/**/
+	if (x.$[0] === '#')
+	//*/
+	{
+		return (ord = _Utils_cmp(x.a, y.a))
+			? ord
+			: (ord = _Utils_cmp(x.b, y.b))
+				? ord
+				: _Utils_cmp(x.c, y.c);
+	}
+
+	// traverse conses until end of a list or a mismatch
+	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
+	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
+}
+
+var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
+var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
+var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
+var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
+
+var _Utils_compare = F2(function(x, y)
+{
+	var n = _Utils_cmp(x, y);
+	return n < 0 ? $elm$core$Basics$LT : n ? $elm$core$Basics$GT : $elm$core$Basics$EQ;
+});
+
+
+// COMMON VALUES
+
+var _Utils_Tuple0_UNUSED = 0;
+var _Utils_Tuple0 = { $: '#0' };
+
+function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
+function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
+
+function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
+function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
+
+function _Utils_chr_UNUSED(c) { return c; }
+function _Utils_chr(c) { return new String(c); }
+
+
+// RECORDS
+
+function _Utils_update(oldRecord, updatedFields)
+{
+	var newRecord = {};
+
+	for (var key in oldRecord)
+	{
+		newRecord[key] = oldRecord[key];
+	}
+
+	for (var key in updatedFields)
+	{
+		newRecord[key] = updatedFields[key];
+	}
+
+	return newRecord;
+}
+
+
+// APPEND
+
+var _Utils_append = F2(_Utils_ap);
+
+function _Utils_ap(xs, ys)
+{
+	// append Strings
+	if (typeof xs === 'string')
+	{
+		return xs + ys;
+	}
+
+	// append Lists
+	if (!xs.b)
+	{
+		return ys;
+	}
+	var root = _List_Cons(xs.a, ys);
+	xs = xs.b
+	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		curr = curr.b = _List_Cons(xs.a, ys);
+	}
+	return root;
+}
+
+
+
+var _List_Nil_UNUSED = { $: 0 };
+var _List_Nil = { $: '[]' };
+
+function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
+function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
+
+
+var _List_cons = F2(_List_Cons);
+
+function _List_fromArray(arr)
+{
+	var out = _List_Nil;
+	for (var i = arr.length; i--; )
+	{
+		out = _List_Cons(arr[i], out);
+	}
+	return out;
+}
+
+function _List_toArray(xs)
+{
+	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		out.push(xs.a);
+	}
+	return out;
+}
+
+var _List_map2 = F3(function(f, xs, ys)
+{
+	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
+	{
+		arr.push(A2(f, xs.a, ys.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map3 = F4(function(f, xs, ys, zs)
+{
+	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A3(f, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map4 = F5(function(f, ws, xs, ys, zs)
+{
+	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
+{
+	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_sortBy = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		return _Utils_cmp(f(a), f(b));
+	}));
+});
+
+var _List_sortWith = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		var ord = A2(f, a, b);
+		return ord === $elm$core$Basics$EQ ? 0 : ord === $elm$core$Basics$LT ? -1 : 1;
+	}));
+});
+
+
+
 var _JsArray_empty = [];
 
 function _JsArray_singleton(value)
@@ -525,271 +790,6 @@ function _Debug_regionToString(region)
 	}
 	return 'on lines ' + region.start.line + ' through ' + region.end.line;
 }
-
-
-
-// EQUALITY
-
-function _Utils_eq(x, y)
-{
-	for (
-		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
-		isEqual && (pair = stack.pop());
-		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
-		)
-	{}
-
-	return isEqual;
-}
-
-function _Utils_eqHelp(x, y, depth, stack)
-{
-	if (x === y)
-	{
-		return true;
-	}
-
-	if (typeof x !== 'object' || x === null || y === null)
-	{
-		typeof x === 'function' && _Debug_crash(5);
-		return false;
-	}
-
-	if (depth > 100)
-	{
-		stack.push(_Utils_Tuple2(x,y));
-		return true;
-	}
-
-	/**/
-	if (x.$ === 'Set_elm_builtin')
-	{
-		x = $elm$core$Set$toList(x);
-		y = $elm$core$Set$toList(y);
-	}
-	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
-	{
-		x = $elm$core$Dict$toList(x);
-		y = $elm$core$Dict$toList(y);
-	}
-	//*/
-
-	/**_UNUSED/
-	if (x.$ < 0)
-	{
-		x = $elm$core$Dict$toList(x);
-		y = $elm$core$Dict$toList(y);
-	}
-	//*/
-
-	for (var key in x)
-	{
-		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
-var _Utils_equal = F2(_Utils_eq);
-var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
-
-
-
-// COMPARISONS
-
-// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
-// the particular integer values assigned to LT, EQ, and GT.
-
-function _Utils_cmp(x, y, ord)
-{
-	if (typeof x !== 'object')
-	{
-		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
-	}
-
-	/**/
-	if (x instanceof String)
-	{
-		var a = x.valueOf();
-		var b = y.valueOf();
-		return a === b ? 0 : a < b ? -1 : 1;
-	}
-	//*/
-
-	/**_UNUSED/
-	if (typeof x.$ === 'undefined')
-	//*/
-	/**/
-	if (x.$[0] === '#')
-	//*/
-	{
-		return (ord = _Utils_cmp(x.a, y.a))
-			? ord
-			: (ord = _Utils_cmp(x.b, y.b))
-				? ord
-				: _Utils_cmp(x.c, y.c);
-	}
-
-	// traverse conses until end of a list or a mismatch
-	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
-	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
-}
-
-var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
-var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
-var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
-var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
-
-var _Utils_compare = F2(function(x, y)
-{
-	var n = _Utils_cmp(x, y);
-	return n < 0 ? $elm$core$Basics$LT : n ? $elm$core$Basics$GT : $elm$core$Basics$EQ;
-});
-
-
-// COMMON VALUES
-
-var _Utils_Tuple0_UNUSED = 0;
-var _Utils_Tuple0 = { $: '#0' };
-
-function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
-function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
-
-function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
-function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
-
-function _Utils_chr_UNUSED(c) { return c; }
-function _Utils_chr(c) { return new String(c); }
-
-
-// RECORDS
-
-function _Utils_update(oldRecord, updatedFields)
-{
-	var newRecord = {};
-
-	for (var key in oldRecord)
-	{
-		newRecord[key] = oldRecord[key];
-	}
-
-	for (var key in updatedFields)
-	{
-		newRecord[key] = updatedFields[key];
-	}
-
-	return newRecord;
-}
-
-
-// APPEND
-
-var _Utils_append = F2(_Utils_ap);
-
-function _Utils_ap(xs, ys)
-{
-	// append Strings
-	if (typeof xs === 'string')
-	{
-		return xs + ys;
-	}
-
-	// append Lists
-	if (!xs.b)
-	{
-		return ys;
-	}
-	var root = _List_Cons(xs.a, ys);
-	xs = xs.b
-	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
-	{
-		curr = curr.b = _List_Cons(xs.a, ys);
-	}
-	return root;
-}
-
-
-
-var _List_Nil_UNUSED = { $: 0 };
-var _List_Nil = { $: '[]' };
-
-function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
-function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
-
-
-var _List_cons = F2(_List_Cons);
-
-function _List_fromArray(arr)
-{
-	var out = _List_Nil;
-	for (var i = arr.length; i--; )
-	{
-		out = _List_Cons(arr[i], out);
-	}
-	return out;
-}
-
-function _List_toArray(xs)
-{
-	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
-	{
-		out.push(xs.a);
-	}
-	return out;
-}
-
-var _List_map2 = F3(function(f, xs, ys)
-{
-	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
-	{
-		arr.push(A2(f, xs.a, ys.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map3 = F4(function(f, xs, ys, zs)
-{
-	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A3(f, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map4 = F5(function(f, ws, xs, ys, zs)
-{
-	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
-{
-	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_sortBy = F2(function(f, xs)
-{
-	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
-		return _Utils_cmp(f(a), f(b));
-	}));
-});
-
-var _List_sortWith = F2(function(f, xs)
-{
-	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
-		var ord = A2(f, a, b);
-		return ord === $elm$core$Basics$EQ ? 0 : ord === $elm$core$Basics$LT ? -1 : 1;
-	}));
-});
 
 
 
@@ -4355,68 +4355,65 @@ function _Browser_load(url)
 		}
 	}));
 }
-
-
-
-var _Bitwise_and = F2(function(a, b)
-{
-	return a & b;
-});
-
-var _Bitwise_or = F2(function(a, b)
-{
-	return a | b;
-});
-
-var _Bitwise_xor = F2(function(a, b)
-{
-	return a ^ b;
-});
-
-function _Bitwise_complement(a)
-{
-	return ~a;
+var $author$project$Types$InProgress = {$: 'InProgress'};
+var $author$project$Types$Player1 = {$: 'Player1'};
+var $author$project$Types$A1 = {$: 'A1'};
+var $author$project$Types$A2 = {$: 'A2'};
+var $author$project$Types$A3 = {$: 'A3'};
+var $author$project$Types$Active = {$: 'Active'};
+var $author$project$Types$B1 = {$: 'B1'};
+var $author$project$Types$B2 = {$: 'B2'};
+var $author$project$Types$B3 = {$: 'B3'};
+var $author$project$Types$C1 = {$: 'C1'};
+var $author$project$Types$C2 = {$: 'C2'};
+var $author$project$Types$C3 = {$: 'C3'};
+var $author$project$Types$Empty = {$: 'Empty'};
+var $author$project$Board$emptyBoard = {
+	a1: {content: $author$project$Types$Empty, id: $author$project$Types$A1, state: $author$project$Types$Active},
+	a2: {content: $author$project$Types$Empty, id: $author$project$Types$A2, state: $author$project$Types$Active},
+	a3: {content: $author$project$Types$Empty, id: $author$project$Types$A3, state: $author$project$Types$Active},
+	b1: {content: $author$project$Types$Empty, id: $author$project$Types$B1, state: $author$project$Types$Active},
+	b2: {content: $author$project$Types$Empty, id: $author$project$Types$B2, state: $author$project$Types$Active},
+	b3: {content: $author$project$Types$Empty, id: $author$project$Types$B3, state: $author$project$Types$Active},
+	c1: {content: $author$project$Types$Empty, id: $author$project$Types$C1, state: $author$project$Types$Active},
+	c2: {content: $author$project$Types$Empty, id: $author$project$Types$C2, state: $author$project$Types$Active},
+	c3: {content: $author$project$Types$Empty, id: $author$project$Types$C3, state: $author$project$Types$Active}
 };
-
-var _Bitwise_shiftLeftBy = F2(function(offset, a)
-{
-	return a << offset;
-});
-
-var _Bitwise_shiftRightBy = F2(function(offset, a)
-{
-	return a >> offset;
-});
-
-var _Bitwise_shiftRightZfBy = F2(function(offset, a)
-{
-	return a >>> offset;
-});
-var $elm$core$List$cons = _List_cons;
-var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
-var $elm$core$Array$foldr = F3(
-	function (func, baseCase, _v0) {
-		var tree = _v0.c;
-		var tail = _v0.d;
-		var helper = F2(
-			function (node, acc) {
-				if (node.$ === 'SubTree') {
-					var subTree = node.a;
-					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
-				} else {
-					var values = node.a;
-					return A3($elm$core$Elm$JsArray$foldr, func, acc, values);
-				}
-			});
-		return A3(
-			$elm$core$Elm$JsArray$foldr,
-			helper,
-			A3($elm$core$Elm$JsArray$foldr, func, baseCase, tail),
-			tree);
+var $author$project$Types$Draws = function (a) {
+	return {$: 'Draws', a: a};
+};
+var $author$project$Types$Level = function (a) {
+	return {$: 'Level', a: a};
+};
+var $author$project$Types$Losses = function (a) {
+	return {$: 'Losses', a: a};
+};
+var $author$project$Types$Player = F5(
+	function (username, level, wins, losses, draws) {
+		return {draws: draws, level: level, losses: losses, username: username, wins: wins};
 	});
-var $elm$core$Array$toList = function (array) {
-	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
+var $author$project$Types$Wins = function (a) {
+	return {$: 'Wins', a: a};
 };
+var $author$project$Main$testPlayer1 = A5(
+	$author$project$Types$Player,
+	'DevDood',
+	$author$project$Types$Level(1),
+	$author$project$Types$Wins(0),
+	$author$project$Types$Losses(0),
+	$author$project$Types$Draws(0));
+var $author$project$Main$testPlayer2 = A5(
+	$author$project$Types$Player,
+	'DevDino',
+	$author$project$Types$Level(1),
+	$author$project$Types$Wins(0),
+	$author$project$Types$Losses(0),
+	$author$project$Types$Draws(0));
+var $author$project$Main$init = {board: $author$project$Board$emptyBoard, player1: $author$project$Main$testPlayer1, player2: $author$project$Main$testPlayer2, playerTurn: $author$project$Types$Player1, status: $author$project$Types$InProgress};
+var $elm$core$Basics$EQ = {$: 'EQ'};
+var $elm$core$Basics$GT = {$: 'GT'};
+var $elm$core$Basics$LT = {$: 'LT'};
+var $elm$core$List$cons = _List_cons;
 var $elm$core$Dict$foldr = F3(
 	function (func, acc, t) {
 		foldr:
@@ -4469,198 +4466,30 @@ var $elm$core$Set$toList = function (_v0) {
 	var dict = _v0.a;
 	return $elm$core$Dict$keys(dict);
 };
-var $elm$core$Basics$EQ = {$: 'EQ'};
-var $elm$core$Basics$GT = {$: 'GT'};
-var $elm$core$Basics$LT = {$: 'LT'};
-var $elm$core$Array$branchFactor = 32;
-var $elm$core$Array$Array_elm_builtin = F4(
-	function (a, b, c, d) {
-		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
-	});
-var $elm$core$Elm$JsArray$empty = _JsArray_empty;
-var $elm$core$Basics$ceiling = _Basics_ceiling;
-var $elm$core$Basics$fdiv = _Basics_fdiv;
-var $elm$core$Basics$logBase = F2(
-	function (base, number) {
-		return _Basics_log(number) / _Basics_log(base);
-	});
-var $elm$core$Basics$toFloat = _Basics_toFloat;
-var $elm$core$Array$shiftStep = $elm$core$Basics$ceiling(
-	A2($elm$core$Basics$logBase, 2, $elm$core$Array$branchFactor));
-var $elm$core$Array$empty = A4($elm$core$Array$Array_elm_builtin, 0, $elm$core$Array$shiftStep, $elm$core$Elm$JsArray$empty, $elm$core$Elm$JsArray$empty);
-var $elm$core$Elm$JsArray$initialize = _JsArray_initialize;
-var $elm$core$Basics$False = {$: 'False'};
-var $elm$core$Array$Leaf = function (a) {
-	return {$: 'Leaf', a: a};
-};
-var $elm$core$Basics$apL = F2(
-	function (f, x) {
-		return f(x);
-	});
-var $elm$core$Basics$add = _Basics_add;
-var $elm$core$Basics$apR = F2(
-	function (x, f) {
-		return f(x);
-	});
-var $elm$core$Basics$eq = _Utils_equal;
-var $elm$core$Basics$floor = _Basics_floor;
-var $elm$core$Elm$JsArray$length = _JsArray_length;
-var $elm$core$Basics$gt = _Utils_gt;
-var $elm$core$Basics$max = F2(
-	function (x, y) {
-		return (_Utils_cmp(x, y) > 0) ? x : y;
-	});
-var $elm$core$Basics$mul = _Basics_mul;
-var $elm$core$List$foldl = F3(
-	function (func, acc, list) {
-		foldl:
-		while (true) {
-			if (!list.b) {
-				return acc;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				var $temp$func = func,
-					$temp$acc = A2(func, x, acc),
-					$temp$list = xs;
-				func = $temp$func;
-				acc = $temp$acc;
-				list = $temp$list;
-				continue foldl;
-			}
-		}
-	});
-var $elm$core$List$reverse = function (list) {
-	return A3($elm$core$List$foldl, $elm$core$List$cons, _List_Nil, list);
-};
-var $elm$core$Basics$sub = _Basics_sub;
-var $elm$core$Array$SubTree = function (a) {
-	return {$: 'SubTree', a: a};
-};
-var $elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
-var $elm$core$Array$compressNodes = F2(
-	function (nodes, acc) {
-		compressNodes:
-		while (true) {
-			var _v0 = A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, nodes);
-			var node = _v0.a;
-			var remainingNodes = _v0.b;
-			var newAcc = A2(
-				$elm$core$List$cons,
-				$elm$core$Array$SubTree(node),
-				acc);
-			if (!remainingNodes.b) {
-				return $elm$core$List$reverse(newAcc);
-			} else {
-				var $temp$nodes = remainingNodes,
-					$temp$acc = newAcc;
-				nodes = $temp$nodes;
-				acc = $temp$acc;
-				continue compressNodes;
-			}
-		}
-	});
-var $elm$core$Tuple$first = function (_v0) {
-	var x = _v0.a;
-	return x;
-};
-var $elm$core$Array$treeFromBuilder = F2(
-	function (nodeList, nodeListSize) {
-		treeFromBuilder:
-		while (true) {
-			var newNodeSize = $elm$core$Basics$ceiling(nodeListSize / $elm$core$Array$branchFactor);
-			if (newNodeSize === 1) {
-				return A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, nodeList).a;
-			} else {
-				var $temp$nodeList = A2($elm$core$Array$compressNodes, nodeList, _List_Nil),
-					$temp$nodeListSize = newNodeSize;
-				nodeList = $temp$nodeList;
-				nodeListSize = $temp$nodeListSize;
-				continue treeFromBuilder;
-			}
-		}
-	});
-var $elm$core$Array$builderToArray = F2(
-	function (reverseNodeList, builder) {
-		if (!builder.nodeListSize) {
-			return A4(
-				$elm$core$Array$Array_elm_builtin,
-				$elm$core$Elm$JsArray$length(builder.tail),
-				$elm$core$Array$shiftStep,
-				$elm$core$Elm$JsArray$empty,
-				builder.tail);
-		} else {
-			var treeLen = builder.nodeListSize * $elm$core$Array$branchFactor;
-			var depth = $elm$core$Basics$floor(
-				A2($elm$core$Basics$logBase, $elm$core$Array$branchFactor, treeLen - 1));
-			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.nodeList) : builder.nodeList;
-			var tree = A2($elm$core$Array$treeFromBuilder, correctNodeList, builder.nodeListSize);
-			return A4(
-				$elm$core$Array$Array_elm_builtin,
-				$elm$core$Elm$JsArray$length(builder.tail) + treeLen,
-				A2($elm$core$Basics$max, 5, depth * $elm$core$Array$shiftStep),
-				tree,
-				builder.tail);
-		}
-	});
-var $elm$core$Basics$idiv = _Basics_idiv;
-var $elm$core$Basics$lt = _Utils_lt;
-var $elm$core$Array$initializeHelp = F5(
-	function (fn, fromIndex, len, nodeList, tail) {
-		initializeHelp:
-		while (true) {
-			if (fromIndex < 0) {
-				return A2(
-					$elm$core$Array$builderToArray,
-					false,
-					{nodeList: nodeList, nodeListSize: (len / $elm$core$Array$branchFactor) | 0, tail: tail});
-			} else {
-				var leaf = $elm$core$Array$Leaf(
-					A3($elm$core$Elm$JsArray$initialize, $elm$core$Array$branchFactor, fromIndex, fn));
-				var $temp$fn = fn,
-					$temp$fromIndex = fromIndex - $elm$core$Array$branchFactor,
-					$temp$len = len,
-					$temp$nodeList = A2($elm$core$List$cons, leaf, nodeList),
-					$temp$tail = tail;
-				fn = $temp$fn;
-				fromIndex = $temp$fromIndex;
-				len = $temp$len;
-				nodeList = $temp$nodeList;
-				tail = $temp$tail;
-				continue initializeHelp;
-			}
-		}
-	});
-var $elm$core$Basics$le = _Utils_le;
-var $elm$core$Basics$remainderBy = _Basics_remainderBy;
-var $elm$core$Array$initialize = F2(
-	function (len, fn) {
-		if (len <= 0) {
-			return $elm$core$Array$empty;
-		} else {
-			var tailLen = len % $elm$core$Array$branchFactor;
-			var tail = A3($elm$core$Elm$JsArray$initialize, tailLen, len - tailLen, fn);
-			var initialFromIndex = (len - tailLen) - $elm$core$Array$branchFactor;
-			return A5($elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
-		}
-	});
-var $elm$core$Array$repeat = F2(
-	function (n, e) {
-		return A2(
-			$elm$core$Array$initialize,
-			n,
-			function (_v0) {
-				return e;
+var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
+var $elm$core$Array$foldr = F3(
+	function (func, baseCase, _v0) {
+		var tree = _v0.c;
+		var tail = _v0.d;
+		var helper = F2(
+			function (node, acc) {
+				if (node.$ === 'SubTree') {
+					var subTree = node.a;
+					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
+				} else {
+					var values = node.a;
+					return A3($elm$core$Elm$JsArray$foldr, func, acc, values);
+				}
 			});
+		return A3(
+			$elm$core$Elm$JsArray$foldr,
+			helper,
+			A3($elm$core$Elm$JsArray$foldr, func, baseCase, tail),
+			tree);
 	});
-var $author$project$PlaySpace$cells = A2($elm$core$Array$repeat, 9, '');
-var $author$project$Main$Player = F5(
-	function (username, level, wins, losses, draws) {
-		return {draws: draws, level: level, losses: losses, username: username, wins: wins};
-	});
-var $author$project$Main$testPlayer1 = A5($author$project$Main$Player, 'DevDood', 12, 0, 0, 0);
-var $author$project$Main$testPlayer2 = A5($author$project$Main$Player, 'DevDino', 8, 0, 0, 0);
-var $author$project$Main$model = {activePlayer: $author$project$Main$testPlayer1, cells: $author$project$PlaySpace$cells, player1: $author$project$Main$testPlayer1, player2: $author$project$Main$testPlayer2, status: 'game in progress'};
+var $elm$core$Array$toList = function (array) {
+	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
+};
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -4682,6 +4511,8 @@ var $elm$core$Result$Ok = function (a) {
 var $elm$json$Json$Decode$OneOf = function (a) {
 	return {$: 'OneOf', a: a};
 };
+var $elm$core$Basics$False = {$: 'False'};
+var $elm$core$Basics$add = _Basics_add;
 var $elm$core$Maybe$Just = function (a) {
 	return {$: 'Just', a: a};
 };
@@ -4709,6 +4540,25 @@ var $elm$json$Json$Decode$indent = function (str) {
 		'\n    ',
 		A2($elm$core$String$split, '\n', str));
 };
+var $elm$core$List$foldl = F3(
+	function (func, acc, list) {
+		foldl:
+		while (true) {
+			if (!list.b) {
+				return acc;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				var $temp$func = func,
+					$temp$acc = A2(func, x, acc),
+					$temp$list = xs;
+				func = $temp$func;
+				acc = $temp$acc;
+				list = $temp$list;
+				continue foldl;
+			}
+		}
+	});
 var $elm$core$List$length = function (xs) {
 	return A3(
 		$elm$core$List$foldl,
@@ -4720,6 +4570,8 @@ var $elm$core$List$length = function (xs) {
 		xs);
 };
 var $elm$core$List$map2 = _List_map2;
+var $elm$core$Basics$le = _Utils_le;
+var $elm$core$Basics$sub = _Basics_sub;
 var $elm$core$List$rangeHelp = F3(
 	function (lo, hi, list) {
 		rangeHelp:
@@ -4771,6 +4623,9 @@ var $elm$core$Char$isDigit = function (_char) {
 };
 var $elm$core$Char$isAlphaNum = function (_char) {
 	return $elm$core$Char$isLower(_char) || ($elm$core$Char$isUpper(_char) || $elm$core$Char$isDigit(_char));
+};
+var $elm$core$List$reverse = function (list) {
+	return A3($elm$core$List$foldl, $elm$core$List$cons, _List_Nil, list);
 };
 var $elm$core$String$uncons = _String_uncons;
 var $elm$json$Json$Decode$errorOneOf = F2(
@@ -4874,6 +4729,152 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 					return introduction + ($elm$json$Json$Decode$indent(
 						A2($elm$json$Json$Encode$encode, 4, json)) + ('\n\n' + msg));
 			}
+		}
+	});
+var $elm$core$Array$branchFactor = 32;
+var $elm$core$Array$Array_elm_builtin = F4(
+	function (a, b, c, d) {
+		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
+	});
+var $elm$core$Elm$JsArray$empty = _JsArray_empty;
+var $elm$core$Basics$ceiling = _Basics_ceiling;
+var $elm$core$Basics$fdiv = _Basics_fdiv;
+var $elm$core$Basics$logBase = F2(
+	function (base, number) {
+		return _Basics_log(number) / _Basics_log(base);
+	});
+var $elm$core$Basics$toFloat = _Basics_toFloat;
+var $elm$core$Array$shiftStep = $elm$core$Basics$ceiling(
+	A2($elm$core$Basics$logBase, 2, $elm$core$Array$branchFactor));
+var $elm$core$Array$empty = A4($elm$core$Array$Array_elm_builtin, 0, $elm$core$Array$shiftStep, $elm$core$Elm$JsArray$empty, $elm$core$Elm$JsArray$empty);
+var $elm$core$Elm$JsArray$initialize = _JsArray_initialize;
+var $elm$core$Array$Leaf = function (a) {
+	return {$: 'Leaf', a: a};
+};
+var $elm$core$Basics$apL = F2(
+	function (f, x) {
+		return f(x);
+	});
+var $elm$core$Basics$apR = F2(
+	function (x, f) {
+		return f(x);
+	});
+var $elm$core$Basics$eq = _Utils_equal;
+var $elm$core$Basics$floor = _Basics_floor;
+var $elm$core$Elm$JsArray$length = _JsArray_length;
+var $elm$core$Basics$gt = _Utils_gt;
+var $elm$core$Basics$max = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) > 0) ? x : y;
+	});
+var $elm$core$Basics$mul = _Basics_mul;
+var $elm$core$Array$SubTree = function (a) {
+	return {$: 'SubTree', a: a};
+};
+var $elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
+var $elm$core$Array$compressNodes = F2(
+	function (nodes, acc) {
+		compressNodes:
+		while (true) {
+			var _v0 = A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, nodes);
+			var node = _v0.a;
+			var remainingNodes = _v0.b;
+			var newAcc = A2(
+				$elm$core$List$cons,
+				$elm$core$Array$SubTree(node),
+				acc);
+			if (!remainingNodes.b) {
+				return $elm$core$List$reverse(newAcc);
+			} else {
+				var $temp$nodes = remainingNodes,
+					$temp$acc = newAcc;
+				nodes = $temp$nodes;
+				acc = $temp$acc;
+				continue compressNodes;
+			}
+		}
+	});
+var $elm$core$Tuple$first = function (_v0) {
+	var x = _v0.a;
+	return x;
+};
+var $elm$core$Array$treeFromBuilder = F2(
+	function (nodeList, nodeListSize) {
+		treeFromBuilder:
+		while (true) {
+			var newNodeSize = $elm$core$Basics$ceiling(nodeListSize / $elm$core$Array$branchFactor);
+			if (newNodeSize === 1) {
+				return A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, nodeList).a;
+			} else {
+				var $temp$nodeList = A2($elm$core$Array$compressNodes, nodeList, _List_Nil),
+					$temp$nodeListSize = newNodeSize;
+				nodeList = $temp$nodeList;
+				nodeListSize = $temp$nodeListSize;
+				continue treeFromBuilder;
+			}
+		}
+	});
+var $elm$core$Array$builderToArray = F2(
+	function (reverseNodeList, builder) {
+		if (!builder.nodeListSize) {
+			return A4(
+				$elm$core$Array$Array_elm_builtin,
+				$elm$core$Elm$JsArray$length(builder.tail),
+				$elm$core$Array$shiftStep,
+				$elm$core$Elm$JsArray$empty,
+				builder.tail);
+		} else {
+			var treeLen = builder.nodeListSize * $elm$core$Array$branchFactor;
+			var depth = $elm$core$Basics$floor(
+				A2($elm$core$Basics$logBase, $elm$core$Array$branchFactor, treeLen - 1));
+			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.nodeList) : builder.nodeList;
+			var tree = A2($elm$core$Array$treeFromBuilder, correctNodeList, builder.nodeListSize);
+			return A4(
+				$elm$core$Array$Array_elm_builtin,
+				$elm$core$Elm$JsArray$length(builder.tail) + treeLen,
+				A2($elm$core$Basics$max, 5, depth * $elm$core$Array$shiftStep),
+				tree,
+				builder.tail);
+		}
+	});
+var $elm$core$Basics$idiv = _Basics_idiv;
+var $elm$core$Basics$lt = _Utils_lt;
+var $elm$core$Array$initializeHelp = F5(
+	function (fn, fromIndex, len, nodeList, tail) {
+		initializeHelp:
+		while (true) {
+			if (fromIndex < 0) {
+				return A2(
+					$elm$core$Array$builderToArray,
+					false,
+					{nodeList: nodeList, nodeListSize: (len / $elm$core$Array$branchFactor) | 0, tail: tail});
+			} else {
+				var leaf = $elm$core$Array$Leaf(
+					A3($elm$core$Elm$JsArray$initialize, $elm$core$Array$branchFactor, fromIndex, fn));
+				var $temp$fn = fn,
+					$temp$fromIndex = fromIndex - $elm$core$Array$branchFactor,
+					$temp$len = len,
+					$temp$nodeList = A2($elm$core$List$cons, leaf, nodeList),
+					$temp$tail = tail;
+				fn = $temp$fn;
+				fromIndex = $temp$fromIndex;
+				len = $temp$len;
+				nodeList = $temp$nodeList;
+				tail = $temp$tail;
+				continue initializeHelp;
+			}
+		}
+	});
+var $elm$core$Basics$remainderBy = _Basics_remainderBy;
+var $elm$core$Array$initialize = F2(
+	function (len, fn) {
+		if (len <= 0) {
+			return $elm$core$Array$empty;
+		} else {
+			var tailLen = len % $elm$core$Array$branchFactor;
+			var tail = A3($elm$core$Elm$JsArray$initialize, tailLen, len - tailLen, fn);
+			var initialFromIndex = (len - tailLen) - $elm$core$Array$branchFactor;
+			return A5($elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
 		}
 	});
 var $elm$core$Basics$True = {$: 'True'};
@@ -5219,196 +5220,107 @@ var $elm$browser$Browser$sandbox = function (impl) {
 			view: impl.view
 		});
 };
-var $author$project$Main$resetBoard = function (game) {
-	return _Utils_update(
-		game,
-		{
-			cells: A2($elm$core$Array$repeat, 9, '')
-		});
-};
-var $author$project$Main$resetGameStatus = function (game) {
-	return _Utils_update(
-		game,
-		{status: 'game in progress'});
-};
-var $elm$core$Bitwise$and = _Bitwise_and;
-var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
-var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
-var $elm$core$Basics$ge = _Utils_ge;
-var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
-var $elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
-var $elm$core$Array$setHelp = F4(
-	function (shift, index, value, tree) {
-		var pos = $elm$core$Array$bitMask & (index >>> shift);
-		var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
-		if (_v0.$ === 'SubTree') {
-			var subTree = _v0.a;
-			var newSub = A4($elm$core$Array$setHelp, shift - $elm$core$Array$shiftStep, index, value, subTree);
-			return A3(
-				$elm$core$Elm$JsArray$unsafeSet,
-				pos,
-				$elm$core$Array$SubTree(newSub),
-				tree);
+var $author$project$Board$resetBoard = F2(
+	function (reset, game) {
+		return _Utils_update(
+			game,
+			{board: reset, status: $author$project$Types$InProgress});
+	});
+var $author$project$Types$Inactive = {$: 'Inactive'};
+var $author$project$Types$O = {$: 'O'};
+var $author$project$Types$X = {$: 'X'};
+var $author$project$Board$setCell = F2(
+	function (game, cell) {
+		var _v0 = game.playerTurn;
+		if (_v0.$ === 'Player1') {
+			return _Utils_update(
+				cell,
+				{content: $author$project$Types$X, state: $author$project$Types$Inactive});
 		} else {
-			var values = _v0.a;
-			var newLeaf = A3($elm$core$Elm$JsArray$unsafeSet, $elm$core$Array$bitMask & index, value, values);
-			return A3(
-				$elm$core$Elm$JsArray$unsafeSet,
-				pos,
-				$elm$core$Array$Leaf(newLeaf),
-				tree);
+			return _Utils_update(
+				cell,
+				{content: $author$project$Types$O, state: $author$project$Types$Inactive});
 		}
 	});
-var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
-var $elm$core$Array$tailIndex = function (len) {
-	return (len >>> 5) << 5;
-};
-var $elm$core$Array$set = F3(
-	function (index, value, array) {
-		var len = array.a;
-		var startShift = array.b;
-		var tree = array.c;
-		var tail = array.d;
-		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? array : ((_Utils_cmp(
-			index,
-			$elm$core$Array$tailIndex(len)) > -1) ? A4(
-			$elm$core$Array$Array_elm_builtin,
-			len,
-			startShift,
-			tree,
-			A3($elm$core$Elm$JsArray$unsafeSet, $elm$core$Array$bitMask & index, value, tail)) : A4(
-			$elm$core$Array$Array_elm_builtin,
-			len,
-			startShift,
-			A4($elm$core$Array$setHelp, startShift, index, value, tree),
-			tail));
+var $author$project$Board$updateBoard = F3(
+	function (cell, cellUpdate, board) {
+		var _v0 = cell.id;
+		switch (_v0.$) {
+			case 'A1':
+				return _Utils_update(
+					board,
+					{
+						a1: cellUpdate(board.a1)
+					});
+			case 'A2':
+				return _Utils_update(
+					board,
+					{
+						a2: cellUpdate(board.a2)
+					});
+			case 'A3':
+				return _Utils_update(
+					board,
+					{
+						a3: cellUpdate(board.a3)
+					});
+			case 'B1':
+				return _Utils_update(
+					board,
+					{
+						b1: cellUpdate(board.b1)
+					});
+			case 'B2':
+				return _Utils_update(
+					board,
+					{
+						b2: cellUpdate(board.b2)
+					});
+			case 'B3':
+				return _Utils_update(
+					board,
+					{
+						b3: cellUpdate(board.b3)
+					});
+			case 'C1':
+				return _Utils_update(
+					board,
+					{
+						c1: cellUpdate(board.c1)
+					});
+			case 'C2':
+				return _Utils_update(
+					board,
+					{
+						c2: cellUpdate(board.c2)
+					});
+			default:
+				return _Utils_update(
+					board,
+					{
+						c3: cellUpdate(board.c3)
+					});
+		}
 	});
-var $author$project$Main$setCell = F2(
-	function (cell, game) {
-		return _Utils_eq(game.activePlayer, game.player1) ? _Utils_update(
-			game,
+var $author$project$Board$updateModel = F2(
+	function (boardUpdate, model) {
+		return _Utils_update(
+			model,
 			{
-				cells: A3($elm$core$Array$set, cell, 'X', game.cells)
-			}) : _Utils_update(
-			game,
-			{
-				cells: A3($elm$core$Array$set, cell, 'O', game.cells)
+				board: boardUpdate(model.board)
 			});
 	});
-var $elm$core$Array$getHelp = F3(
-	function (shift, index, tree) {
-		getHelp:
-		while (true) {
-			var pos = $elm$core$Array$bitMask & (index >>> shift);
-			var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
-			if (_v0.$ === 'SubTree') {
-				var subTree = _v0.a;
-				var $temp$shift = shift - $elm$core$Array$shiftStep,
-					$temp$index = index,
-					$temp$tree = subTree;
-				shift = $temp$shift;
-				index = $temp$index;
-				tree = $temp$tree;
-				continue getHelp;
-			} else {
-				var values = _v0.a;
-				return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
-			}
-		}
+var $author$project$Board$updateCell = F2(
+	function (model, cell) {
+		return $author$project$Board$updateModel(
+			A2(
+				$author$project$Board$updateBoard,
+				cell,
+				$author$project$Board$setCell(model)));
 	});
-var $elm$core$Array$get = F2(
-	function (index, _v0) {
-		var len = _v0.a;
-		var startShift = _v0.b;
-		var tree = _v0.c;
-		var tail = _v0.d;
-		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? $elm$core$Maybe$Nothing : ((_Utils_cmp(
-			index,
-			$elm$core$Array$tailIndex(len)) > -1) ? $elm$core$Maybe$Just(
-			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
-			A3($elm$core$Array$getHelp, startShift, index, tree)));
-	});
-var $author$project$PlaySpace$cell_A1 = function (game) {
-	var _v0 = A2($elm$core$Array$get, 0, game.cells);
-	if (_v0.$ === 'Just') {
-		var content = _v0.a;
-		return content;
-	} else {
-		return '';
-	}
-};
-var $author$project$PlaySpace$cell_A2 = function (game) {
-	var _v0 = A2($elm$core$Array$get, 1, game.cells);
-	if (_v0.$ === 'Just') {
-		var content = _v0.a;
-		return content;
-	} else {
-		return '';
-	}
-};
-var $author$project$PlaySpace$cell_A3 = function (game) {
-	var _v0 = A2($elm$core$Array$get, 2, game.cells);
-	if (_v0.$ === 'Just') {
-		var content = _v0.a;
-		return content;
-	} else {
-		return '';
-	}
-};
-var $author$project$PlaySpace$cell_B1 = function (game) {
-	var _v0 = A2($elm$core$Array$get, 3, game.cells);
-	if (_v0.$ === 'Just') {
-		var content = _v0.a;
-		return content;
-	} else {
-		return '';
-	}
-};
-var $author$project$PlaySpace$cell_B2 = function (game) {
-	var _v0 = A2($elm$core$Array$get, 4, game.cells);
-	if (_v0.$ === 'Just') {
-		var content = _v0.a;
-		return content;
-	} else {
-		return '';
-	}
-};
-var $author$project$PlaySpace$cell_B3 = function (game) {
-	var _v0 = A2($elm$core$Array$get, 5, game.cells);
-	if (_v0.$ === 'Just') {
-		var content = _v0.a;
-		return content;
-	} else {
-		return '';
-	}
-};
-var $author$project$PlaySpace$cell_C1 = function (game) {
-	var _v0 = A2($elm$core$Array$get, 6, game.cells);
-	if (_v0.$ === 'Just') {
-		var content = _v0.a;
-		return content;
-	} else {
-		return '';
-	}
-};
-var $author$project$PlaySpace$cell_C2 = function (game) {
-	var _v0 = A2($elm$core$Array$get, 7, game.cells);
-	if (_v0.$ === 'Just') {
-		var content = _v0.a;
-		return content;
-	} else {
-		return '';
-	}
-};
-var $author$project$PlaySpace$cell_C3 = function (game) {
-	var _v0 = A2($elm$core$Array$get, 8, game.cells);
-	if (_v0.$ === 'Just') {
-		var content = _v0.a;
-		return content;
-	} else {
-		return '';
-	}
-};
+var $author$project$Types$Draw = {$: 'Draw'};
+var $author$project$Types$Player2 = {$: 'Player2'};
+var $author$project$Types$Victory = {$: 'Victory'};
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -5420,97 +5332,201 @@ var $elm$core$List$filter = F2(
 			_List_Nil,
 			list);
 	});
-var $author$project$Main$gameOverMessage = F2(
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$Main$checkEndgameConditions = function (game) {
+	var board = game.board;
+	var c1 = board.c1.content;
+	var c2 = board.c2.content;
+	var c3 = board.c3.content;
+	var b3 = board.b3.content;
+	var b2 = board.b2.content;
+	var b1 = board.b1.content;
+	var a3 = board.a3.content;
+	var a2 = board.a2.content;
+	var a1 = board.a1.content;
+	var emptyCellList = A2(
+		$elm$core$List$filter,
+		function (cell) {
+			return _Utils_eq(cell, $author$project$Types$Empty);
+		},
+		_List_fromArray(
+			[a1, a2, a3, b1, b2, b3, c1, c2, c3]));
+	return ((!_Utils_eq(a1, $author$project$Types$Empty)) && (_Utils_eq(a1, a2) && _Utils_eq(a2, a3))) ? $author$project$Types$Victory : (((!_Utils_eq(b1, $author$project$Types$Empty)) && (_Utils_eq(b1, b2) && _Utils_eq(b2, b3))) ? $author$project$Types$Victory : (((!_Utils_eq(c1, $author$project$Types$Empty)) && (_Utils_eq(c1, c2) && _Utils_eq(c2, c3))) ? $author$project$Types$Victory : (((!_Utils_eq(a1, $author$project$Types$Empty)) && (_Utils_eq(a1, b1) && _Utils_eq(b1, c1))) ? $author$project$Types$Victory : (((!_Utils_eq(a2, $author$project$Types$Empty)) && (_Utils_eq(a2, b2) && _Utils_eq(b2, c2))) ? $author$project$Types$Victory : (((!_Utils_eq(a3, $author$project$Types$Empty)) && (_Utils_eq(a3, b3) && _Utils_eq(b3, c3))) ? $author$project$Types$Victory : (((!_Utils_eq(a1, $author$project$Types$Empty)) && (_Utils_eq(a1, b2) && _Utils_eq(b2, c3))) ? $author$project$Types$Victory : (((!_Utils_eq(a3, $author$project$Types$Empty)) && (_Utils_eq(a3, b2) && _Utils_eq(b2, c1))) ? $author$project$Types$Victory : ((!$elm$core$List$length(emptyCellList)) ? $author$project$Types$Draw : $author$project$Types$InProgress))))))));
+};
+var $author$project$Board$freezeBoard = F2(
+	function (freeze, board) {
+		return _Utils_update(
+			board,
+			{
+				a1: freeze(board.a1),
+				a2: freeze(board.a2),
+				a3: freeze(board.a3),
+				b1: freeze(board.b1),
+				b2: freeze(board.b2),
+				b3: freeze(board.b3),
+				c1: freeze(board.c1),
+				c2: freeze(board.c2),
+				c3: freeze(board.c3)
+			});
+	});
+var $author$project$Board$freezeCell = function (cell) {
+	return _Utils_update(
+		cell,
+		{state: $author$project$Types$Inactive});
+};
+var $author$project$Board$freezeGame = F2(
+	function (freeze, game) {
+		return _Utils_update(
+			game,
+			{
+				board: freeze(game.board)
+			});
+	});
+var $author$project$Board$freezeCells = $author$project$Board$freezeGame(
+	$author$project$Board$freezeBoard($author$project$Board$freezeCell));
+var $author$project$Main$setGameStatus = F2(
 	function (conclusion, game) {
 		return _Utils_update(
 			game,
 			{status: conclusion});
 	});
-var $elm$core$Basics$neq = _Utils_notEqual;
-var $author$project$Main$incrementDraws = function (player) {
+var $author$project$Player$getStat = function (stat) {
+	switch (stat.$) {
+		case 'Level':
+			var level = stat.a;
+			return level;
+		case 'Wins':
+			var wins = stat.a;
+			return wins;
+		case 'Losses':
+			var losses = stat.a;
+			return losses;
+		default:
+			var draws = stat.a;
+			return draws;
+	}
+};
+var $author$project$Player$setDraws = function (player) {
 	return _Utils_update(
 		player,
-		{draws: player.draws + 1});
+		{
+			draws: $author$project$Types$Draws(
+				$author$project$Player$getStat(player.draws) + 1)
+		});
 };
-var $author$project$Main$updatePlayer = F2(
-	function (updatedPlayer, game) {
-		return _Utils_eq(updatedPlayer.username, game.player1.username) ? _Utils_update(
-			game,
-			{player1: updatedPlayer}) : _Utils_update(
-			game,
-			{player2: updatedPlayer});
+var $author$project$Player$updateModel = F2(
+	function (player, model) {
+		var _v0 = model.playerTurn;
+		if (_v0.$ === 'Player1') {
+			return _Utils_update(
+				model,
+				{player1: player});
+		} else {
+			return _Utils_update(
+				model,
+				{player2: player});
+		}
 	});
-var $author$project$Main$updateDraws = function (player) {
-	return $author$project$Main$updatePlayer(
-		$author$project$Main$incrementDraws(player));
+var $author$project$Player$updateDraws = function (player) {
+	return $author$project$Player$updateModel(
+		$author$project$Player$setDraws(player));
 };
-var $author$project$Main$incrementLosses = function (player) {
+var $author$project$Player$setLevel = function (player) {
+	var winExp = $author$project$Player$getStat(player.wins) * 25;
+	var lossExp = $author$project$Player$getStat(player.losses);
+	var drawExp = $author$project$Player$getStat(player.draws) * 5;
+	var totalExp = (winExp + drawExp) + lossExp;
+	var playerLevel = ((totalExp / 100) | 0) + 1;
 	return _Utils_update(
 		player,
-		{losses: player.losses + 1});
+		{
+			level: $author$project$Types$Level(playerLevel)
+		});
 };
-var $author$project$Main$updateLosses = function (player) {
-	return $author$project$Main$updatePlayer(
-		$author$project$Main$incrementLosses(player));
-};
-var $author$project$Main$incrementWins = function (player) {
+var $author$project$Player$setLosses = function (player) {
 	return _Utils_update(
 		player,
-		{wins: player.wins + 1});
+		{
+			losses: $author$project$Types$Losses(
+				$author$project$Player$getStat(player.losses) + 1)
+		});
 };
-var $author$project$Main$updateWins = function (player) {
-	return $author$project$Main$updatePlayer(
-		$author$project$Main$incrementWins(player));
+var $author$project$Player$updateLosses = function (player) {
+	return $author$project$Player$updateModel(
+		$author$project$Player$setLevel(
+			$author$project$Player$setLosses(player)));
+};
+var $author$project$Player$setWins = function (player) {
+	return _Utils_update(
+		player,
+		{
+			wins: $author$project$Types$Wins(
+				$author$project$Player$getStat(player.wins) + 1)
+		});
+};
+var $author$project$Player$updateWins = function (player) {
+	return $author$project$Player$updateModel(
+		$author$project$Player$setLevel(
+			$author$project$Player$setWins(player)));
 };
 var $author$project$Main$updateGameStatus = function (game) {
-	var emptyCellList = A2(
-		$elm$core$List$filter,
-		$elm$core$String$isEmpty,
-		$elm$core$Array$toList(game.cells));
-	var draw = !$elm$core$List$length(emptyCellList);
-	var c3 = $author$project$PlaySpace$cell_C3(game);
-	var c2 = $author$project$PlaySpace$cell_C2(game);
-	var c1 = $author$project$PlaySpace$cell_C1(game);
-	var b3 = $author$project$PlaySpace$cell_B3(game);
-	var b2 = $author$project$PlaySpace$cell_B2(game);
-	var b1 = $author$project$PlaySpace$cell_B1(game);
-	var a3 = $author$project$PlaySpace$cell_A3(game);
-	var a2 = $author$project$PlaySpace$cell_A2(game);
-	var a1 = $author$project$PlaySpace$cell_A1(game);
-	var victory = ((a1 !== '') && (_Utils_eq(a1, a2) && _Utils_eq(a2, a3))) ? true : (((b1 !== '') && (_Utils_eq(b1, b2) && _Utils_eq(b2, b3))) ? true : (((c1 !== '') && (_Utils_eq(c1, c2) && _Utils_eq(c2, c3))) ? true : (((a1 !== '') && (_Utils_eq(a1, b1) && _Utils_eq(b1, c1))) ? true : (((a2 !== '') && (_Utils_eq(a2, b2) && _Utils_eq(b2, c2))) ? true : (((a3 !== '') && (_Utils_eq(a3, b3) && _Utils_eq(b3, c3))) ? true : (((a1 !== '') && (_Utils_eq(a1, b2) && _Utils_eq(b2, c3))) ? true : (((a3 !== '') && (_Utils_eq(a3, b2) && _Utils_eq(b2, c1))) ? true : false)))))));
-	return victory ? (_Utils_eq(game.activePlayer, game.player1) ? A2(
-		$author$project$Main$gameOverMessage,
-		'victory',
-		A2(
-			$author$project$Main$updateLosses,
-			game.player2,
-			A2($author$project$Main$updateWins, game.player1, game))) : A2(
-		$author$project$Main$gameOverMessage,
-		'victory',
-		A2(
-			$author$project$Main$updateLosses,
-			game.player1,
-			A2($author$project$Main$updateWins, game.player2, game)))) : (draw ? A2(
-		$author$project$Main$gameOverMessage,
-		'draw',
-		A2(
-			$author$project$Main$updateDraws,
-			game.player2,
-			A2($author$project$Main$updateDraws, game.player1, game))) : (_Utils_eq(game.player1, game.activePlayer) ? _Utils_update(
-		game,
-		{activePlayer: game.player2}) : _Utils_update(
-		game,
-		{activePlayer: game.player1})));
+	var _v0 = $author$project$Main$checkEndgameConditions(game);
+	switch (_v0.$) {
+		case 'Victory':
+			var _v1 = game.playerTurn;
+			if (_v1.$ === 'Player1') {
+				return $author$project$Board$freezeCells(
+					A2(
+						$author$project$Main$setGameStatus,
+						$author$project$Types$Victory,
+						A2(
+							$author$project$Player$updateLosses,
+							game.player2,
+							A2($author$project$Player$updateWins, game.player1, game))));
+			} else {
+				return $author$project$Board$freezeCells(
+					A2(
+						$author$project$Main$setGameStatus,
+						$author$project$Types$Victory,
+						A2(
+							$author$project$Player$updateLosses,
+							game.player1,
+							A2($author$project$Player$updateWins, game.player2, game))));
+			}
+		case 'Draw':
+			return A2(
+				$author$project$Main$setGameStatus,
+				$author$project$Types$Draw,
+				A2(
+					$author$project$Player$updateDraws,
+					game.player2,
+					A2($author$project$Player$updateDraws, game.player1, game)));
+		default:
+			var _v2 = game.playerTurn;
+			if (_v2.$ === 'Player1') {
+				return _Utils_update(
+					game,
+					{playerTurn: $author$project$Types$Player2});
+			} else {
+				return _Utils_update(
+					game,
+					{playerTurn: $author$project$Types$Player1});
+			}
+	}
 };
 var $author$project$Main$update = F2(
 	function (msg, game) {
 		if (msg.$ === 'CellClicked') {
 			var cell = msg.a;
-			return $author$project$Main$updateGameStatus(
-				A2($author$project$Main$setCell, cell, game));
+			var _v1 = cell.state;
+			if (_v1.$ === 'Active') {
+				return $author$project$Main$updateGameStatus(
+					A3($author$project$Board$updateCell, game, cell, game));
+			} else {
+				return game;
+			}
 		} else {
-			return $author$project$Main$resetBoard(
-				$author$project$Main$resetGameStatus(game));
+			return A2($author$project$Board$resetBoard, $author$project$Board$emptyBoard, game);
 		}
 	});
 var $author$project$Main$CellClicked = function (a) {
@@ -5552,103 +5568,148 @@ var $elm$html$Html$p = _VirtualDom_node('p');
 var $elm$html$Html$section = _VirtualDom_node('section');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $author$project$Board$viewContent = function (content) {
+	switch (content.$) {
+		case 'Empty':
+			return '';
+		case 'X':
+			return 'X';
+		default:
+			return 'O';
+	}
+};
 var $author$project$Main$ResetGame = {$: 'ResetGame'};
+var $author$project$Main$viewActivePlayer = function (game) {
+	var _v0 = game.playerTurn;
+	if (_v0.$ === 'Player1') {
+		return game.player1.username;
+	} else {
+		return game.player2.username;
+	}
+};
 var $author$project$Main$viewGameOverMessage = function (game) {
-	return (game.status === 'game in progress') ? A2($elm$html$Html$section, _List_Nil, _List_Nil) : ((game.status === 'draw') ? A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$section,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$id('drawMsg')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$p,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('gameOverText')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('It\'s a draw!')
-							])),
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Main$ResetGame),
-								$elm$html$Html$Attributes$class('gameOverBtn')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Play Again?')
-							]))
-					])),
-				A2(
+	var _v0 = game.status;
+	switch (_v0.$) {
+		case 'InProgress':
+			return A2($elm$html$Html$section, _List_Nil, _List_Nil);
+		case 'Draw':
+			return A2(
 				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$id('overlay')
-					]),
-				_List_Nil)
-			])) : A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$section,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$id('victoryMsg')
-					]),
+				_List_Nil,
 				_List_fromArray(
 					[
 						A2(
-						$elm$html$Html$p,
+						$elm$html$Html$section,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('gameOverText')
+								$elm$html$Html$Attributes$id('drawMsg')
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(game.activePlayer.username + ' won the game!')
-							])),
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Main$ResetGame),
-								$elm$html$Html$Attributes$class('gameOverBtn')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Play Again?')
+								A2(
+								$elm$html$Html$p,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('gameOverText')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('It\'s a draw!')
+									])),
+								A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick($author$project$Main$ResetGame),
+										$elm$html$Html$Attributes$class('gameOverBtn')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Play Again?')
+									]))
 							]))
-					])),
-				A2(
+					]));
+		default:
+			return A2(
 				$elm$html$Html$div,
+				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$id('overlay')
-					]),
-				_List_Nil)
-			])));
+						A2(
+						$elm$html$Html$section,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$id('victoryMsg')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$p,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('gameOverText')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(
+										$author$project$Main$viewActivePlayer(game) + ' won the game!')
+									])),
+								A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick($author$project$Main$ResetGame),
+										$elm$html$Html$Attributes$class('gameOverBtn')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Play Again?')
+									]))
+							]))
+					]));
+	}
+};
+var $author$project$Player$viewStat = function (stat) {
+	switch (stat.$) {
+		case 'Level':
+			var level = stat.a;
+			return $elm$core$String$fromInt(level);
+		case 'Wins':
+			var wins = stat.a;
+			return $elm$core$String$fromInt(wins);
+		case 'Losses':
+			var losses = stat.a;
+			return $elm$core$String$fromInt(losses);
+		default:
+			var draws = stat.a;
+			return $elm$core$String$fromInt(draws);
+	}
+};
+var $author$project$Main$viewState = function (state) {
+	if (state.$ === 'Active') {
+		return 'active';
+	} else {
+		return 'inactive';
+	}
 };
 var $author$project$Main$view = function (game) {
 	var player2 = game.player2;
 	var player1 = game.player1;
-	var p2_wins = 'Wins:   ' + $elm$core$String$fromInt(game.player2.wins);
-	var p2_losses = 'Losses: ' + $elm$core$String$fromInt(game.player2.losses);
-	var p2_draws = 'Draws:  ' + $elm$core$String$fromInt(game.player2.draws);
-	var p1_wins = 'Wins:   ' + $elm$core$String$fromInt(game.player1.wins);
-	var p1_losses = 'Losses: ' + $elm$core$String$fromInt(game.player1.losses);
-	var p1_draws = 'Draws:  ' + $elm$core$String$fromInt(game.player1.draws);
+	var p2_wins = 'Wins:   ' + $author$project$Player$viewStat(player2.wins);
+	var p2_losses = 'Losses: ' + $author$project$Player$viewStat(player2.losses);
+	var p2_draws = 'Draws:  ' + $author$project$Player$viewStat(player2.draws);
+	var p1_wins = 'Wins:   ' + $author$project$Player$viewStat(player1.wins);
+	var p1_losses = 'Losses: ' + $author$project$Player$viewStat(player1.losses);
+	var p1_draws = 'Draws:  ' + $author$project$Player$viewStat(player1.draws);
+	var c3 = game.board.c3;
+	var c2 = game.board.c2;
+	var c1 = game.board.c1;
+	var b3 = game.board.b3;
+	var b2 = game.board.b2;
+	var b1 = game.board.b1;
+	var a3 = game.board.a3;
+	var a2 = game.board.a2;
+	var a1 = game.board.a1;
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -5796,114 +5857,132 @@ var $author$project$Main$view = function (game) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$CellClicked(0))
+								$author$project$Main$CellClicked(a1)),
+								$elm$html$Html$Attributes$class(
+								$author$project$Main$viewState(a1.state))
 							]),
 						_List_fromArray(
 							[
 								$elm$html$Html$text(
-								$author$project$PlaySpace$cell_A1(game))
+								$author$project$Board$viewContent(a1.content))
 							])),
 						A2(
 						$elm$html$Html$button,
 						_List_fromArray(
 							[
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$CellClicked(1))
+								$author$project$Main$CellClicked(a2)),
+								$elm$html$Html$Attributes$class(
+								$author$project$Main$viewState(a2.state))
 							]),
 						_List_fromArray(
 							[
 								$elm$html$Html$text(
-								$author$project$PlaySpace$cell_A2(game))
+								$author$project$Board$viewContent(a2.content))
 							])),
 						A2(
 						$elm$html$Html$button,
 						_List_fromArray(
 							[
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$CellClicked(2))
+								$author$project$Main$CellClicked(a3)),
+								$elm$html$Html$Attributes$class(
+								$author$project$Main$viewState(a3.state))
 							]),
 						_List_fromArray(
 							[
 								$elm$html$Html$text(
-								$author$project$PlaySpace$cell_A3(game))
+								$author$project$Board$viewContent(a3.content))
 							])),
 						A2(
 						$elm$html$Html$button,
 						_List_fromArray(
 							[
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$CellClicked(3))
+								$author$project$Main$CellClicked(b1)),
+								$elm$html$Html$Attributes$class(
+								$author$project$Main$viewState(b1.state))
 							]),
 						_List_fromArray(
 							[
 								$elm$html$Html$text(
-								$author$project$PlaySpace$cell_B1(game))
+								$author$project$Board$viewContent(b1.content))
 							])),
 						A2(
 						$elm$html$Html$button,
 						_List_fromArray(
 							[
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$CellClicked(4))
+								$author$project$Main$CellClicked(b2)),
+								$elm$html$Html$Attributes$class(
+								$author$project$Main$viewState(b2.state))
 							]),
 						_List_fromArray(
 							[
 								$elm$html$Html$text(
-								$author$project$PlaySpace$cell_B2(game))
+								$author$project$Board$viewContent(b2.content))
 							])),
 						A2(
 						$elm$html$Html$button,
 						_List_fromArray(
 							[
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$CellClicked(5))
+								$author$project$Main$CellClicked(b3)),
+								$elm$html$Html$Attributes$class(
+								$author$project$Main$viewState(b3.state))
 							]),
 						_List_fromArray(
 							[
 								$elm$html$Html$text(
-								$author$project$PlaySpace$cell_B3(game))
+								$author$project$Board$viewContent(b3.content))
 							])),
 						A2(
 						$elm$html$Html$button,
 						_List_fromArray(
 							[
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$CellClicked(6))
+								$author$project$Main$CellClicked(c1)),
+								$elm$html$Html$Attributes$class(
+								$author$project$Main$viewState(c1.state))
 							]),
 						_List_fromArray(
 							[
 								$elm$html$Html$text(
-								$author$project$PlaySpace$cell_C1(game))
+								$author$project$Board$viewContent(c1.content))
 							])),
 						A2(
 						$elm$html$Html$button,
 						_List_fromArray(
 							[
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$CellClicked(7))
+								$author$project$Main$CellClicked(c2)),
+								$elm$html$Html$Attributes$class(
+								$author$project$Main$viewState(c2.state))
 							]),
 						_List_fromArray(
 							[
 								$elm$html$Html$text(
-								$author$project$PlaySpace$cell_C2(game))
+								$author$project$Board$viewContent(c2.content))
 							])),
 						A2(
 						$elm$html$Html$button,
 						_List_fromArray(
 							[
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$CellClicked(8))
+								$author$project$Main$CellClicked(c3)),
+								$elm$html$Html$Attributes$class(
+								$author$project$Main$viewState(c3.state))
 							]),
 						_List_fromArray(
 							[
 								$elm$html$Html$text(
-								$author$project$PlaySpace$cell_C3(game))
+								$author$project$Board$viewContent(c3.content))
 							]))
 					])),
 				$author$project$Main$viewGameOverMessage(game)
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$sandbox(
-	{init: $author$project$Main$model, update: $author$project$Main$update, view: $author$project$Main$view});
+	{init: $author$project$Main$init, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));

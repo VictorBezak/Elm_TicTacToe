@@ -7,7 +7,7 @@ import Html.Events exposing (onClick)
 import Board exposing (..)
 import Player exposing (..)
 
-import Model exposing (Model, PlayerTurn(..), Status(..), Player, Stats(..), Cell, Id(..), Content(..), State(..))
+import Types exposing (Model, PlayerTurn(..), Status(..), Player, Stats(..), Cell, Id(..), Content(..), State(..))
 
 
 ---------------------------------------------------------------------
@@ -77,12 +77,12 @@ view game =
                 [ button [ onClick (CellClicked a1), class (viewState a1.state) ] [ text (viewContent a1.content) ]
                 , button [ onClick (CellClicked a2), class (viewState a2.state) ] [ text (viewContent a2.content) ]
                 , button [ onClick (CellClicked a3), class (viewState a3.state) ] [ text (viewContent a3.content) ]
-                , button [ onClick (CellClicked b1), class (viewState a1.state) ] [ text (viewContent b1.content) ]
-                , button [ onClick (CellClicked b2), class (viewState a2.state) ] [ text (viewContent b2.content) ]
-                , button [ onClick (CellClicked b3), class (viewState a3.state) ] [ text (viewContent b3.content) ]
-                , button [ onClick (CellClicked c1), class (viewState a1.state) ] [ text (viewContent c1.content) ]
-                , button [ onClick (CellClicked c2), class (viewState a2.state) ] [ text (viewContent c2.content) ]
-                , button [ onClick (CellClicked c3), class (viewState a3.state) ] [ text (viewContent c3.content) ]
+                , button [ onClick (CellClicked b1), class (viewState b1.state) ] [ text (viewContent b1.content) ]
+                , button [ onClick (CellClicked b2), class (viewState b2.state) ] [ text (viewContent b2.content) ]
+                , button [ onClick (CellClicked b3), class (viewState b3.state) ] [ text (viewContent b3.content) ]
+                , button [ onClick (CellClicked c1), class (viewState c1.state) ] [ text (viewContent c1.content) ]
+                , button [ onClick (CellClicked c2), class (viewState c2.state) ] [ text (viewContent c2.content) ]
+                , button [ onClick (CellClicked c3), class (viewState c3.state) ] [ text (viewContent c3.content) ]
                 ]
             , viewGameOverMessage game
             ]
@@ -118,7 +118,7 @@ viewGameOverMessage game =
                     [ p [ class "gameOverText" ] [ text "It's a draw!" ]
                     , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
                     ]
-                , div [ id "overlay" ] []
+                -- , div [ id "overlay" ] []
                 ]
         
         Victory ->
@@ -127,7 +127,7 @@ viewGameOverMessage game =
                     [ p [ class "gameOverText" ] [ text (viewActivePlayer game ++ " won the game!") ]
                     , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
                     ]
-                , div [ id "overlay" ] []
+                -- , div [ id "overlay" ] []
                 ]
 
 
@@ -169,12 +169,14 @@ updateGameStatus game =
                         |> updateWins game.player1
                         |> updateLosses game.player2
                         |> setGameStatus Victory
+                        |> freezeCells
 
                 Player2 ->
                     game
                         |> updateWins game.player2
                         |> updateLosses game.player1
                         |> setGameStatus Victory
+                        |> freezeCells
         
         Draw ->
             game
