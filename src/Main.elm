@@ -9,61 +9,11 @@ import Player exposing (..)
 
 import Model exposing (Model, PlayerTurn(..), Status(..), Player, Stats(..), Cell, Id(..), Content(..), State(..))
 
----------------------------------------------------------------------
-
--- FROM Player.elm
--- type alias Player =
---     { username : String
---     , level : Stats 
---     , wins : Stats
---     , losses : Stats
---     , draws : Stats
---     }
 
 ---------------------------------------------------------------------
-
--- FROM Board.elm
--- type alias Cell =
---     { id : Id
---     , content : Content
---     , state : State
---     }
-
--- type alias Board =
---     { a1 : Cell
---     , a2 : Cell
---     , a3 : Cell
---     , b1 : Cell
---     , b2 : Cell
---     , b3 : Cell
---     , c1 : Cell
---     , c2 : Cell
---     , c3 : Cell
---     }
-
----------------------------------------------------------------------
-
 -- MODEL
--- type Status
---     = InProgress
---     | Victory
---     | Draw
 
--- type PlayerTurn
---     = Player1
---     | Player2
-
--- type alias Model =
---     { board : Board
---     , player1 : Player
---     , player2 : Player
---     , playerTurn : PlayerTurn
---     , status : Status
---     }
-
--- temporarily hardcoded
--- will remove if account creating is enabled
-testPlayer1 : Player
+testPlayer1 : Player  -- temporarily hardcoded. will remove if account creating is enabled
 testPlayer1 = Player "DevDood" (Level 1) (Wins 0) (Losses 0) (Draws 0)
 testPlayer2 : Player
 testPlayer2 = Player "DevDino" (Level 1) (Wins 0) (Losses 0) (Draws 0)
@@ -78,7 +28,9 @@ init =
     }
 
 
+---------------------------------------------------------------------
 -- VIEW
+
 view : Model -> Html Msg
 view game =
     let
@@ -179,7 +131,9 @@ viewGameOverMessage game =
                 ]
 
 
+---------------------------------------------------------------------
 -- UPDATE
+
 type Msg
     = CellClicked Cell
     | ResetGame
@@ -201,6 +155,9 @@ update msg game =
             game
                 |> resetBoard emptyBoard
 
+
+---------------------------------------------------------------------
+-- Helper functions
 
 updateGameStatus : Model -> Model
 updateGameStatus game =
@@ -272,65 +229,10 @@ setGameStatus : Status -> Model -> Model
 setGameStatus conclusion game =
     { game | status = conclusion }
 
--- resetGame : Board -> Model -> Model
--- resetGame reset game =
---     { game | board = reset, status = InProgress }
 
--- updateWins : Player -> Model -> Model
--- updateWins player =
---     updateModel <| setLevel <| setWins player
+---------------------------------------------------------------------
+-- MAIN
 
--- updateLosses : Player -> Model -> Model
--- updateLosses player =
---     updateModel <| setLevel <| setLosses player
-
--- updateDraws : Player -> Model -> Model
--- updateDraws player =
---     updateModel <| setLevel <| setDraws player
-
--- updateModel : Player -> Model -> Model
--- updateModel player model =
---     case model.playerTurn of
---         Player1 ->
---             { model | player1 = player }
-
---         Player2 ->
---             { model | player2 = player }
-
--- setWins : Player -> Player
--- setWins player =
---     { player | wins = Wins (getStat player.wins + 1) }
-
--- setLosses : Player -> Player
--- setLosses player =
---     { player | losses = Losses (getStat player.losses + 1) }
-
--- setDraws : Player -> Player
--- setDraws player =
---     { player | draws = Draws (getStat player.draws + 1) }
-    
--- setLevel : Player -> Player
--- setLevel player =
---     let
---         winExp =
---             getStat player.wins * 25
-
---         drawExp =
---             getStat player.draws * 5
-        
---         lossExp =
---             getStat player.losses
-
---         totalExp =
---             winExp + drawExp + lossExp
-    
---         playerLevel =
---             (totalExp // 100) + 1  
---     in
---         { player | level = Level playerLevel }
-
-
--- INITIALIZE
 main : Program () Model Msg
 main =
     Browser.sandbox

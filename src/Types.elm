@@ -1,4 +1,4 @@
-module Model exposing (Model, PlayerTurn(..), Status(..), Player, Stats(..), Cell, Board, Id(..), Content(..), State(..))
+module Types exposing (Model, PlayerTurn(..), Status(..), Player, Stats(..), Cell, Board, Id(..), Content(..), State(..))
 
 -- module Model exposing
 --     ( Model, Status(..), PlayerTurn(..)
@@ -7,6 +7,15 @@ module Model exposing (Model, PlayerTurn(..), Status(..), Player, Stats(..), Cel
 --     )
 
 ---------------------------------------------------------------------
+-- Main.elm
+
+type alias Model =
+    { board : Board
+    , player1 : Player
+    , player2 : Player
+    , playerTurn : PlayerTurn
+    , status : Status
+    }
 
 type PlayerTurn
     = Player1
@@ -17,21 +26,9 @@ type Status
     | Victory
     | Draw
 
-type alias Model =
-    { board : Board
-    , player1 : Player
-    , player2 : Player
-    , playerTurn : PlayerTurn
-    , status : Status
-    }
 
 ---------------------------------------------------------------------
-
-type Stats
-    = Level Int
-    | Wins Int
-    | Draws Int
-    | Losses Int
+-- Player.elm
 
 type alias Player =
     { username : String
@@ -41,7 +38,33 @@ type alias Player =
     , draws : Stats
     }
 
+type Stats
+    = Level Int
+    | Wins Int
+    | Draws Int
+    | Losses Int
+
+
 ---------------------------------------------------------------------
+-- Board.elm
+
+type alias Board =
+    { a1 : Cell
+    , a2 : Cell
+    , a3 : Cell
+    , b1 : Cell
+    , b2 : Cell
+    , b3 : Cell
+    , c1 : Cell
+    , c2 : Cell
+    , c3 : Cell
+    }
+
+type alias Cell =
+    { id : Id
+    , content : Content
+    , state : State
+    }
 
 type Id
     = A1
@@ -62,21 +85,4 @@ type Content
 type State
     = Active
     | Inactive
-
-type alias Cell =
-    { id : Id
-    , content : Content
-    , state : State
-    }
-
-type alias Board =
-    { a1 : Cell
-    , a2 : Cell
-    , a3 : Cell
-    , b1 : Cell
-    , b2 : Cell
-    , b3 : Cell
-    , c1 : Cell
-    , c2 : Cell
-    , c3 : Cell
-    }
+    
