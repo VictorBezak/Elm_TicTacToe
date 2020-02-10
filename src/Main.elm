@@ -92,6 +92,7 @@ view game =
             ]
 
 
+-- View Helper Functions
 viewState : State -> String
 viewState state =
     case state of
@@ -158,32 +159,19 @@ update msg game =
                 |> resetBoard emptyBoard
 
 
----------------------------------------------------------------------
--- Helper functions
-
+-- Update Helper Functions
 updateGameStatus : Model -> Model
 updateGameStatus game =
     case checkEndgameConditions game of
         Victory ->
-            case game.playerTurn of      
-                Player1 ->
-                    game
-                        |> updateWins game.player1
-                        |> updateLosses game.player2
-                        |> setGameStatus Victory
-                        |> freezeCells
-
-                Player2 ->
-                    game
-                        |> updateWins game.player2
-                        |> updateLosses game.player1
-                        |> setGameStatus Victory
-                        |> freezeCells
+            game
+                |> updateWinLoss
+                |> setGameStatus Victory
+                |> freezeCells
         
         Draw ->
             game
-                |> updateDraws game.player1
-                |> updateDraws game.player2
+                |> updateDraws
                 |> setGameStatus Draw
 
         InProgress ->

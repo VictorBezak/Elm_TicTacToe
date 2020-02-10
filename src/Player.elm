@@ -1,4 +1,4 @@
-module Player exposing (viewStat, getStat, updateWins, updateLosses, updateDraws)
+module Player exposing (viewStat, getStat, updateWinLoss, updateDraws)
 
 import Types exposing (Model, PlayerTurn(..), Player, Stats(..))
 
@@ -6,7 +6,9 @@ import Types exposing (Model, PlayerTurn(..), Player, Stats(..))
 -- import Json.Encode as Encode
 -- port cache : Encode.Value -> Cmd msg
 
+
 ---------------------------------------------------------------------
+-- Public Functions
 
 viewStat : Stats -> String
 viewStat stat =
@@ -38,33 +40,57 @@ getStat stat =
         Draws draws ->
             draws
 
-updateWins : Player -> Model -> Model
-updateWins player =
-    updateModel <| setLevel <| setWins player
+updateWinLoss : Model -> Model
+updateWinLoss =
+    updateModelVictory winLevelUpdate lossLevelUpdate
 
-updateLosses : Player -> Model -> Model
-updateLosses player =
-    updateModel <| setLevel <| setLosses player
+updateDraws : Model -> Model
+updateDraws =
+    updateModelDraw drawLevelUpdate
 
-updateDraws : Player -> Model -> Model
-updateDraws player =
-    updateModel <| setLevel <| setDraws player
-    -- updateModel <| setDraws player
 
 ---------------------------------------------------------------------
 -- Private functions
--- updateLevel : Player -> Model -> Model
--- updateLevel player =
---     updateModel <| setLevel player
 
-updateModel : Player -> Model -> Model
-updateModel player model =
-    case model.playerTurn of
+updateModelVictory : (Player -> Player) -> (Player -> Player) -> Model -> Model
+updateModelVictory winUpdate lossUpdate game =
+    case game.playerTurn of
         Player1 ->
-            { model | player1 = player }
+            { game
+            | player1 = winUpdate game.player1
+            , player2 = lossUpdate game.player2
+            }
 
         Player2 ->
-            { model | player2 = player }
+            { game
+            | player1 = lossUpdate game.player1
+            , player2 = winUpdate game.player2
+            }
+
+updateModelDraw : (Player -> Player) -> Model -> Model
+updateModelDraw drawUpdate game =
+    { game
+    | player1 = drawUpdate game.player1
+    , player2 = drawUpdate game.player2
+    }
+
+winLevelUpdate : Player -> Player
+winLevelUpdate player =
+    player
+        |> setWins
+        |> setLevel
+
+lossLevelUpdate : Player -> Player
+lossLevelUpdate player =
+    player
+        |> setLosses
+        |> setLevel
+
+drawLevelUpdate : Player -> Player
+drawLevelUpdate player =
+    player
+        |> setDraws
+        |> setLevel
 
 setWins : Player -> Player
 setWins player =

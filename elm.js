@@ -5426,24 +5426,20 @@ var $author$project$Player$setLevel = function (player) {
 			level: $author$project$Types$Level(playerLevel)
 		});
 };
-var $author$project$Player$updateModel = F2(
-	function (player, model) {
-		var _v0 = model.playerTurn;
-		if (_v0.$ === 'Player1') {
-			return _Utils_update(
-				model,
-				{player1: player});
-		} else {
-			return _Utils_update(
-				model,
-				{player2: player});
-		}
-	});
-var $author$project$Player$updateDraws = function (player) {
-	return $author$project$Player$updateModel(
-		$author$project$Player$setLevel(
-			$author$project$Player$setDraws(player)));
+var $author$project$Player$drawLevelUpdate = function (player) {
+	return $author$project$Player$setLevel(
+		$author$project$Player$setDraws(player));
 };
+var $author$project$Player$updateModelDraw = F2(
+	function (drawUpdate, game) {
+		return _Utils_update(
+			game,
+			{
+				player1: drawUpdate(game.player1),
+				player2: drawUpdate(game.player2)
+			});
+	});
+var $author$project$Player$updateDraws = $author$project$Player$updateModelDraw($author$project$Player$drawLevelUpdate);
 var $author$project$Player$setLosses = function (player) {
 	return _Utils_update(
 		player,
@@ -5452,11 +5448,29 @@ var $author$project$Player$setLosses = function (player) {
 				$author$project$Player$getStat(player.losses) + 1)
 		});
 };
-var $author$project$Player$updateLosses = function (player) {
-	return $author$project$Player$updateModel(
-		$author$project$Player$setLevel(
-			$author$project$Player$setLosses(player)));
+var $author$project$Player$lossLevelUpdate = function (player) {
+	return $author$project$Player$setLevel(
+		$author$project$Player$setLosses(player));
 };
+var $author$project$Player$updateModelVictory = F3(
+	function (winUpdate, lossUpdate, game) {
+		var _v0 = game.playerTurn;
+		if (_v0.$ === 'Player1') {
+			return _Utils_update(
+				game,
+				{
+					player1: winUpdate(game.player1),
+					player2: lossUpdate(game.player2)
+				});
+		} else {
+			return _Utils_update(
+				game,
+				{
+					player1: lossUpdate(game.player1),
+					player2: winUpdate(game.player2)
+				});
+		}
+	});
 var $author$project$Player$setWins = function (player) {
 	return _Utils_update(
 		player,
@@ -5465,46 +5479,28 @@ var $author$project$Player$setWins = function (player) {
 				$author$project$Player$getStat(player.wins) + 1)
 		});
 };
-var $author$project$Player$updateWins = function (player) {
-	return $author$project$Player$updateModel(
-		$author$project$Player$setLevel(
-			$author$project$Player$setWins(player)));
+var $author$project$Player$winLevelUpdate = function (player) {
+	return $author$project$Player$setLevel(
+		$author$project$Player$setWins(player));
 };
+var $author$project$Player$updateWinLoss = A2($author$project$Player$updateModelVictory, $author$project$Player$winLevelUpdate, $author$project$Player$lossLevelUpdate);
 var $author$project$Main$updateGameStatus = function (game) {
 	var _v0 = $author$project$Main$checkEndgameConditions(game);
 	switch (_v0.$) {
 		case 'Victory':
-			var _v1 = game.playerTurn;
-			if (_v1.$ === 'Player1') {
-				return $author$project$Board$freezeCells(
-					A2(
-						$author$project$Main$setGameStatus,
-						$author$project$Types$Victory,
-						A2(
-							$author$project$Player$updateLosses,
-							game.player2,
-							A2($author$project$Player$updateWins, game.player1, game))));
-			} else {
-				return $author$project$Board$freezeCells(
-					A2(
-						$author$project$Main$setGameStatus,
-						$author$project$Types$Victory,
-						A2(
-							$author$project$Player$updateLosses,
-							game.player1,
-							A2($author$project$Player$updateWins, game.player2, game))));
-			}
+			return $author$project$Board$freezeCells(
+				A2(
+					$author$project$Main$setGameStatus,
+					$author$project$Types$Victory,
+					$author$project$Player$updateWinLoss(game)));
 		case 'Draw':
 			return A2(
 				$author$project$Main$setGameStatus,
 				$author$project$Types$Draw,
-				A2(
-					$author$project$Player$updateDraws,
-					game.player2,
-					A2($author$project$Player$updateDraws, game.player1, game)));
+				$author$project$Player$updateDraws(game));
 		default:
-			var _v2 = game.playerTurn;
-			if (_v2.$ === 'Player1') {
+			var _v1 = game.playerTurn;
+			if (_v1.$ === 'Player1') {
 				return _Utils_update(
 					game,
 					{playerTurn: $author$project$Types$Player2});

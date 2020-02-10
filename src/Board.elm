@@ -2,7 +2,9 @@ module Board exposing (viewContent, emptyBoard, resetBoard, updateCell, freezeCe
 
 import Types exposing (Model, PlayerTurn(..), Status(..), Board, Cell, Id(..), Content(..), State(..))
 
+
 ---------------------------------------------------------------------
+-- Public Functions
 
 viewContent : Content -> String
 viewContent content =
@@ -43,8 +45,8 @@ freezeCells =
 
 
 --------------------------------------------------
-
 -- Private Functions
+
 updateModel : (Board -> Board) -> Model -> Model
 updateModel boardUpdate model =
     { model | board = boardUpdate model.board }
@@ -87,7 +89,6 @@ setCell game cell =
 
         Player2 ->
             { cell | content = O, state = Inactive }
-
 
 freezeGame : (Board -> Board) -> Model -> Model
 freezeGame freeze game =
