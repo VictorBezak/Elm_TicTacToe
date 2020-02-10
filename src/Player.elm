@@ -48,8 +48,8 @@ updateLosses player =
 
 updateDraws : Player -> Model -> Model
 updateDraws player =
-    -- updateModel <| setLevel <| setDraws player
-    updateModel <| setDraws player
+    updateModel <| setLevel <| setDraws player
+    -- updateModel <| setDraws player
 
 ---------------------------------------------------------------------
 -- Private functions

@@ -35,11 +35,13 @@ view : Model -> Html Msg
 view game =
     let
         player1 = game.player1
+        p1_level = "Level:   " ++ viewStat player1.level
         p1_wins = "Wins:   " ++ viewStat player1.wins
         p1_losses = "Losses: " ++ viewStat player1.losses
         p1_draws = "Draws:  " ++ viewStat player1.draws
 
         player2 = game.player2
+        p2_level = "Level:   " ++ viewStat player2.level
         p2_wins = "Wins:   " ++ viewStat player2.wins
         p2_losses = "Losses: " ++ viewStat player2.losses
         p2_draws = "Draws:  " ++ viewStat player2.draws
@@ -58,22 +60,8 @@ view game =
         div [ id "container" ]
             [ header [ id "header" ]
                 [ h1 [ id "title" ] [ text "Tic-Tac-Toe" ]
-                , div [ id "playerStats" ]
-                    [ div [ id "player1" ]
-                        [ h2 [ class "playerName" ] [ text player1.username ]
-                        , p [ class "playerRecord" ] [ text p1_wins ]
-                        , p [ class "playerRecord" ] [ text p1_losses ]
-                        , p [ class "playerRecord" ] [ text p1_draws ]
-                        ]
-                    , div [ id "player2" ]
-                        [ h2 [ class "playerName" ] [ text player2.username ]
-                        , p [ class "playerRecord" ] [ text p2_wins ]
-                        , p [ class "playerRecord" ] [ text p2_losses ]
-                        , p [ class "playerRecord" ] [ text p2_draws ]
-                        ]
-                    ]
                 ]
-            , section [ id "playspace" ]
+            , section [ id "board" ]
                 [ button [ onClick (CellClicked a1), class (viewState a1.state) ] [ text (viewContent a1.content) ]
                 , button [ onClick (CellClicked a2), class (viewState a2.state) ] [ text (viewContent a2.content) ]
                 , button [ onClick (CellClicked a3), class (viewState a3.state) ] [ text (viewContent a3.content) ]
@@ -83,6 +71,22 @@ view game =
                 , button [ onClick (CellClicked c1), class (viewState c1.state) ] [ text (viewContent c1.content) ]
                 , button [ onClick (CellClicked c2), class (viewState c2.state) ] [ text (viewContent c2.content) ]
                 , button [ onClick (CellClicked c3), class (viewState c3.state) ] [ text (viewContent c3.content) ]
+                ]
+            , div [ id "playerStats" ]
+                [ div [ id "player1" ]
+                    [ h2 [ class "playerName" ] [ text player1.username ]
+                    , p [ class "playerLevel" ] [ text p1_level ]
+                    , p [ class "playerRecord" ] [ text p1_wins ]
+                    , p [ class "playerRecord" ] [ text p1_losses ]
+                    , p [ class "playerRecord" ] [ text p1_draws ]
+                    ]
+                , div [ id "player2" ]
+                    [ h2 [ class "playerName" ] [ text player2.username ]
+                    , p [ class "playerLevel" ] [ text p2_level ]
+                    , p [ class "playerRecord" ] [ text p2_wins ]
+                    , p [ class "playerRecord" ] [ text p2_losses ]
+                    , p [ class "playerRecord" ] [ text p2_draws ]
+                    ]
                 ]
             , viewGameOverMessage game
             ]
@@ -113,21 +117,19 @@ viewGameOverMessage game =
             section [] []
     
         Draw ->
-            div []
+            div [ class "gameOverDiv" ]
                 [ section [ id "drawMsg" ]
                     [ p [ class "gameOverText" ] [ text "It's a draw!" ]
                     , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
                     ]
-                -- , div [ id "overlay" ] []
                 ]
         
         Victory ->
-            div []
+            div [ class "gameOverDiv" ]
                 [ section [ id "victoryMsg" ]
                     [ p [ class "gameOverText" ] [ text (viewActivePlayer game ++ " won the game!") ]
                     , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
                     ]
-                -- , div [ id "overlay" ] []
                 ]
 
 

@@ -5414,6 +5414,18 @@ var $author$project$Player$setDraws = function (player) {
 				$author$project$Player$getStat(player.draws) + 1)
 		});
 };
+var $author$project$Player$setLevel = function (player) {
+	var winExp = $author$project$Player$getStat(player.wins) * 25;
+	var lossExp = $author$project$Player$getStat(player.losses);
+	var drawExp = $author$project$Player$getStat(player.draws) * 5;
+	var totalExp = (winExp + drawExp) + lossExp;
+	var playerLevel = ((totalExp / 100) | 0) + 1;
+	return _Utils_update(
+		player,
+		{
+			level: $author$project$Types$Level(playerLevel)
+		});
+};
 var $author$project$Player$updateModel = F2(
 	function (player, model) {
 		var _v0 = model.playerTurn;
@@ -5429,19 +5441,8 @@ var $author$project$Player$updateModel = F2(
 	});
 var $author$project$Player$updateDraws = function (player) {
 	return $author$project$Player$updateModel(
-		$author$project$Player$setDraws(player));
-};
-var $author$project$Player$setLevel = function (player) {
-	var winExp = $author$project$Player$getStat(player.wins) * 25;
-	var lossExp = $author$project$Player$getStat(player.losses);
-	var drawExp = $author$project$Player$getStat(player.draws) * 5;
-	var totalExp = (winExp + drawExp) + lossExp;
-	var playerLevel = ((totalExp / 100) | 0) + 1;
-	return _Utils_update(
-		player,
-		{
-			level: $author$project$Types$Level(playerLevel)
-		});
+		$author$project$Player$setLevel(
+			$author$project$Player$setDraws(player)));
 };
 var $author$project$Player$setLosses = function (player) {
 	return _Utils_update(
@@ -5595,7 +5596,10 @@ var $author$project$Main$viewGameOverMessage = function (game) {
 		case 'Draw':
 			return A2(
 				$elm$html$Html$div,
-				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('gameOverDiv')
+					]),
 				_List_fromArray(
 					[
 						A2(
@@ -5632,7 +5636,10 @@ var $author$project$Main$viewGameOverMessage = function (game) {
 		default:
 			return A2(
 				$elm$html$Html$div,
-				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('gameOverDiv')
+					]),
 				_List_fromArray(
 					[
 						A2(
@@ -5697,9 +5704,11 @@ var $author$project$Main$view = function (game) {
 	var player1 = game.player1;
 	var p2_wins = 'Wins:   ' + $author$project$Player$viewStat(player2.wins);
 	var p2_losses = 'Losses: ' + $author$project$Player$viewStat(player2.losses);
+	var p2_level = 'Level:   ' + $author$project$Player$viewStat(player2.level);
 	var p2_draws = 'Draws:  ' + $author$project$Player$viewStat(player2.draws);
 	var p1_wins = 'Wins:   ' + $author$project$Player$viewStat(player1.wins);
 	var p1_losses = 'Losses: ' + $author$project$Player$viewStat(player1.losses);
+	var p1_level = 'Level:   ' + $author$project$Player$viewStat(player1.level);
 	var p1_draws = 'Draws:  ' + $author$project$Player$viewStat(player1.draws);
 	var c3 = game.board.c3;
 	var c2 = game.board.c2;
@@ -5735,120 +5744,13 @@ var $author$project$Main$view = function (game) {
 						_List_fromArray(
 							[
 								$elm$html$Html$text('Tic-Tac-Toe')
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$id('playerStats')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$div,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$id('player1')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$h2,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('playerName')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text(player1.username)
-											])),
-										A2(
-										$elm$html$Html$p,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('playerRecord')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text(p1_wins)
-											])),
-										A2(
-										$elm$html$Html$p,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('playerRecord')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text(p1_losses)
-											])),
-										A2(
-										$elm$html$Html$p,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('playerRecord')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text(p1_draws)
-											]))
-									])),
-								A2(
-								$elm$html$Html$div,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$id('player2')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$h2,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('playerName')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text(player2.username)
-											])),
-										A2(
-										$elm$html$Html$p,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('playerRecord')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text(p2_wins)
-											])),
-										A2(
-										$elm$html$Html$p,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('playerRecord')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text(p2_losses)
-											])),
-										A2(
-										$elm$html$Html$p,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('playerRecord')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text(p2_draws)
-											]))
-									]))
 							]))
 					])),
 				A2(
 				$elm$html$Html$section,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$id('playspace')
+						$elm$html$Html$Attributes$id('board')
 					]),
 				_List_fromArray(
 					[
@@ -5977,6 +5879,133 @@ var $author$project$Main$view = function (game) {
 							[
 								$elm$html$Html$text(
 								$author$project$Board$viewContent(c3.content))
+							]))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$id('playerStats')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$id('player1')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h2,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('playerName')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(player1.username)
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('playerLevel')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(p1_level)
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('playerRecord')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(p1_wins)
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('playerRecord')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(p1_losses)
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('playerRecord')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(p1_draws)
+									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$id('player2')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h2,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('playerName')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(player2.username)
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('playerLevel')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(p2_level)
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('playerRecord')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(p2_wins)
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('playerRecord')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(p2_losses)
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('playerRecord')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(p2_draws)
+									]))
 							]))
 					])),
 				$author$project$Main$viewGameOverMessage(game)
