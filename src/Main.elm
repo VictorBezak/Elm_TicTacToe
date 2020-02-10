@@ -9,7 +9,7 @@ import Board exposing (..)
 
 import Types.Main exposing (Model, PlayerTurn(..), Status(..))
 import Types.Player exposing (Player, Stats(..))
-import Types.Board exposing (Board, Cell, Id(..), Content(..), State(..))
+import Types.Board exposing (Cell, Id(..), Content(..), State(..))
 
 
 ---------------------------------------------------------------------
