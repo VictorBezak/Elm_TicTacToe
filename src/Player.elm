@@ -1,6 +1,7 @@
 module Player exposing (viewStat, getStat, updateWinLoss, updateDraws)
 
-import Types exposing (Model, PlayerTurn(..), Player, Stats(..))
+import Types.Main exposing (Model, PlayerTurn(..))
+import Types.Player exposing (Player, Stats(..))
 
 -- port module Player exposing (..)
 -- import Json.Encode as Encode
@@ -111,15 +112,15 @@ setLevel player =
             getStat player.wins * 25
 
         drawExp =
-            getStat player.draws * 5
+            getStat player.draws * 10
         
         lossExp =
-            getStat player.losses
+            getStat player.losses * 5
 
         totalExp =
             winExp + drawExp + lossExp
     
         playerLevel =
-            (totalExp // 100) + 1  
+            (totalExp // 50) + 1  
     in
         { player | level = Level playerLevel }

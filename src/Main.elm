@@ -4,10 +4,12 @@ import Browser
 import Html exposing (Html, div, section, header, h1, h2, p, text, button)
 import Html.Attributes exposing (id, class)
 import Html.Events exposing (onClick)
-import Board exposing (..)
 import Player exposing (..)
+import Board exposing (..)
 
-import Types exposing (Model, PlayerTurn(..), Status(..), Player, Stats(..), Cell, Id(..), Content(..), State(..))
+import Types.Main exposing (Model, PlayerTurn(..), Status(..))
+import Types.Player exposing (Player, Stats(..))
+import Types.Board exposing (Board, Cell, Id(..), Content(..), State(..))
 
 
 ---------------------------------------------------------------------

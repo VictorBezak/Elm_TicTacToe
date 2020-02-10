@@ -1,7 +1,7 @@
 module Board exposing (viewContent, emptyBoard, resetBoard, updateCell, freezeCells)
 
-import Types exposing (Model, PlayerTurn(..), Status(..), Board, Cell, Id(..), Content(..), State(..))
-
+import Types.Main exposing (Model, PlayerTurn(..), Status(..))
+import Types.Board exposing (Board, Cell, Id(..), Content(..), State(..))
 
 ---------------------------------------------------------------------
 -- Public Functions

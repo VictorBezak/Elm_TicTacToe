@@ -85,4 +85,3 @@ type Content
 type State
     = Active
     | Inactive
-    

@@ -4355,61 +4355,61 @@ function _Browser_load(url)
 		}
 	}));
 }
-var $author$project$Types$InProgress = {$: 'InProgress'};
-var $author$project$Types$Player1 = {$: 'Player1'};
-var $author$project$Types$A1 = {$: 'A1'};
-var $author$project$Types$A2 = {$: 'A2'};
-var $author$project$Types$A3 = {$: 'A3'};
-var $author$project$Types$Active = {$: 'Active'};
-var $author$project$Types$B1 = {$: 'B1'};
-var $author$project$Types$B2 = {$: 'B2'};
-var $author$project$Types$B3 = {$: 'B3'};
-var $author$project$Types$C1 = {$: 'C1'};
-var $author$project$Types$C2 = {$: 'C2'};
-var $author$project$Types$C3 = {$: 'C3'};
-var $author$project$Types$Empty = {$: 'Empty'};
+var $author$project$Types$Main$InProgress = {$: 'InProgress'};
+var $author$project$Types$Main$Player1 = {$: 'Player1'};
+var $author$project$Types$Board$A1 = {$: 'A1'};
+var $author$project$Types$Board$A2 = {$: 'A2'};
+var $author$project$Types$Board$A3 = {$: 'A3'};
+var $author$project$Types$Board$Active = {$: 'Active'};
+var $author$project$Types$Board$B1 = {$: 'B1'};
+var $author$project$Types$Board$B2 = {$: 'B2'};
+var $author$project$Types$Board$B3 = {$: 'B3'};
+var $author$project$Types$Board$C1 = {$: 'C1'};
+var $author$project$Types$Board$C2 = {$: 'C2'};
+var $author$project$Types$Board$C3 = {$: 'C3'};
+var $author$project$Types$Board$Empty = {$: 'Empty'};
 var $author$project$Board$emptyBoard = {
-	a1: {content: $author$project$Types$Empty, id: $author$project$Types$A1, state: $author$project$Types$Active},
-	a2: {content: $author$project$Types$Empty, id: $author$project$Types$A2, state: $author$project$Types$Active},
-	a3: {content: $author$project$Types$Empty, id: $author$project$Types$A3, state: $author$project$Types$Active},
-	b1: {content: $author$project$Types$Empty, id: $author$project$Types$B1, state: $author$project$Types$Active},
-	b2: {content: $author$project$Types$Empty, id: $author$project$Types$B2, state: $author$project$Types$Active},
-	b3: {content: $author$project$Types$Empty, id: $author$project$Types$B3, state: $author$project$Types$Active},
-	c1: {content: $author$project$Types$Empty, id: $author$project$Types$C1, state: $author$project$Types$Active},
-	c2: {content: $author$project$Types$Empty, id: $author$project$Types$C2, state: $author$project$Types$Active},
-	c3: {content: $author$project$Types$Empty, id: $author$project$Types$C3, state: $author$project$Types$Active}
+	a1: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$A1, state: $author$project$Types$Board$Active},
+	a2: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$A2, state: $author$project$Types$Board$Active},
+	a3: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$A3, state: $author$project$Types$Board$Active},
+	b1: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$B1, state: $author$project$Types$Board$Active},
+	b2: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$B2, state: $author$project$Types$Board$Active},
+	b3: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$B3, state: $author$project$Types$Board$Active},
+	c1: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$C1, state: $author$project$Types$Board$Active},
+	c2: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$C2, state: $author$project$Types$Board$Active},
+	c3: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$C3, state: $author$project$Types$Board$Active}
 };
-var $author$project$Types$Draws = function (a) {
+var $author$project$Types$Player$Draws = function (a) {
 	return {$: 'Draws', a: a};
 };
-var $author$project$Types$Level = function (a) {
+var $author$project$Types$Player$Level = function (a) {
 	return {$: 'Level', a: a};
 };
-var $author$project$Types$Losses = function (a) {
+var $author$project$Types$Player$Losses = function (a) {
 	return {$: 'Losses', a: a};
 };
-var $author$project$Types$Player = F5(
+var $author$project$Types$Player$Player = F5(
 	function (username, level, wins, losses, draws) {
 		return {draws: draws, level: level, losses: losses, username: username, wins: wins};
 	});
-var $author$project$Types$Wins = function (a) {
+var $author$project$Types$Player$Wins = function (a) {
 	return {$: 'Wins', a: a};
 };
 var $author$project$Main$testPlayer1 = A5(
-	$author$project$Types$Player,
+	$author$project$Types$Player$Player,
 	'DevDood',
-	$author$project$Types$Level(1),
-	$author$project$Types$Wins(0),
-	$author$project$Types$Losses(0),
-	$author$project$Types$Draws(0));
+	$author$project$Types$Player$Level(1),
+	$author$project$Types$Player$Wins(0),
+	$author$project$Types$Player$Losses(0),
+	$author$project$Types$Player$Draws(0));
 var $author$project$Main$testPlayer2 = A5(
-	$author$project$Types$Player,
+	$author$project$Types$Player$Player,
 	'DevDino',
-	$author$project$Types$Level(1),
-	$author$project$Types$Wins(0),
-	$author$project$Types$Losses(0),
-	$author$project$Types$Draws(0));
-var $author$project$Main$init = {board: $author$project$Board$emptyBoard, player1: $author$project$Main$testPlayer1, player2: $author$project$Main$testPlayer2, playerTurn: $author$project$Types$Player1, status: $author$project$Types$InProgress};
+	$author$project$Types$Player$Level(1),
+	$author$project$Types$Player$Wins(0),
+	$author$project$Types$Player$Losses(0),
+	$author$project$Types$Player$Draws(0));
+var $author$project$Main$init = {board: $author$project$Board$emptyBoard, player1: $author$project$Main$testPlayer1, player2: $author$project$Main$testPlayer2, playerTurn: $author$project$Types$Main$Player1, status: $author$project$Types$Main$InProgress};
 var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
@@ -5224,22 +5224,22 @@ var $author$project$Board$resetBoard = F2(
 	function (reset, game) {
 		return _Utils_update(
 			game,
-			{board: reset, status: $author$project$Types$InProgress});
+			{board: reset, status: $author$project$Types$Main$InProgress});
 	});
-var $author$project$Types$Inactive = {$: 'Inactive'};
-var $author$project$Types$O = {$: 'O'};
-var $author$project$Types$X = {$: 'X'};
+var $author$project$Types$Board$Inactive = {$: 'Inactive'};
+var $author$project$Types$Board$O = {$: 'O'};
+var $author$project$Types$Board$X = {$: 'X'};
 var $author$project$Board$setCell = F2(
 	function (game, cell) {
 		var _v0 = game.playerTurn;
 		if (_v0.$ === 'Player1') {
 			return _Utils_update(
 				cell,
-				{content: $author$project$Types$X, state: $author$project$Types$Inactive});
+				{content: $author$project$Types$Board$X, state: $author$project$Types$Board$Inactive});
 		} else {
 			return _Utils_update(
 				cell,
-				{content: $author$project$Types$O, state: $author$project$Types$Inactive});
+				{content: $author$project$Types$Board$O, state: $author$project$Types$Board$Inactive});
 		}
 	});
 var $author$project$Board$updateBoard = F3(
@@ -5318,9 +5318,9 @@ var $author$project$Board$updateCell = F2(
 				cell,
 				$author$project$Board$setCell(model)));
 	});
-var $author$project$Types$Draw = {$: 'Draw'};
-var $author$project$Types$Player2 = {$: 'Player2'};
-var $author$project$Types$Victory = {$: 'Victory'};
+var $author$project$Types$Main$Draw = {$: 'Draw'};
+var $author$project$Types$Main$Player2 = {$: 'Player2'};
+var $author$project$Types$Main$Victory = {$: 'Victory'};
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -5347,11 +5347,11 @@ var $author$project$Main$checkEndgameConditions = function (game) {
 	var emptyCellList = A2(
 		$elm$core$List$filter,
 		function (cell) {
-			return _Utils_eq(cell, $author$project$Types$Empty);
+			return _Utils_eq(cell, $author$project$Types$Board$Empty);
 		},
 		_List_fromArray(
 			[a1, a2, a3, b1, b2, b3, c1, c2, c3]));
-	return ((!_Utils_eq(a1, $author$project$Types$Empty)) && (_Utils_eq(a1, a2) && _Utils_eq(a2, a3))) ? $author$project$Types$Victory : (((!_Utils_eq(b1, $author$project$Types$Empty)) && (_Utils_eq(b1, b2) && _Utils_eq(b2, b3))) ? $author$project$Types$Victory : (((!_Utils_eq(c1, $author$project$Types$Empty)) && (_Utils_eq(c1, c2) && _Utils_eq(c2, c3))) ? $author$project$Types$Victory : (((!_Utils_eq(a1, $author$project$Types$Empty)) && (_Utils_eq(a1, b1) && _Utils_eq(b1, c1))) ? $author$project$Types$Victory : (((!_Utils_eq(a2, $author$project$Types$Empty)) && (_Utils_eq(a2, b2) && _Utils_eq(b2, c2))) ? $author$project$Types$Victory : (((!_Utils_eq(a3, $author$project$Types$Empty)) && (_Utils_eq(a3, b3) && _Utils_eq(b3, c3))) ? $author$project$Types$Victory : (((!_Utils_eq(a1, $author$project$Types$Empty)) && (_Utils_eq(a1, b2) && _Utils_eq(b2, c3))) ? $author$project$Types$Victory : (((!_Utils_eq(a3, $author$project$Types$Empty)) && (_Utils_eq(a3, b2) && _Utils_eq(b2, c1))) ? $author$project$Types$Victory : ((!$elm$core$List$length(emptyCellList)) ? $author$project$Types$Draw : $author$project$Types$InProgress))))))));
+	return ((!_Utils_eq(a1, $author$project$Types$Board$Empty)) && (_Utils_eq(a1, a2) && _Utils_eq(a2, a3))) ? $author$project$Types$Main$Victory : (((!_Utils_eq(b1, $author$project$Types$Board$Empty)) && (_Utils_eq(b1, b2) && _Utils_eq(b2, b3))) ? $author$project$Types$Main$Victory : (((!_Utils_eq(c1, $author$project$Types$Board$Empty)) && (_Utils_eq(c1, c2) && _Utils_eq(c2, c3))) ? $author$project$Types$Main$Victory : (((!_Utils_eq(a1, $author$project$Types$Board$Empty)) && (_Utils_eq(a1, b1) && _Utils_eq(b1, c1))) ? $author$project$Types$Main$Victory : (((!_Utils_eq(a2, $author$project$Types$Board$Empty)) && (_Utils_eq(a2, b2) && _Utils_eq(b2, c2))) ? $author$project$Types$Main$Victory : (((!_Utils_eq(a3, $author$project$Types$Board$Empty)) && (_Utils_eq(a3, b3) && _Utils_eq(b3, c3))) ? $author$project$Types$Main$Victory : (((!_Utils_eq(a1, $author$project$Types$Board$Empty)) && (_Utils_eq(a1, b2) && _Utils_eq(b2, c3))) ? $author$project$Types$Main$Victory : (((!_Utils_eq(a3, $author$project$Types$Board$Empty)) && (_Utils_eq(a3, b2) && _Utils_eq(b2, c1))) ? $author$project$Types$Main$Victory : ((!$elm$core$List$length(emptyCellList)) ? $author$project$Types$Main$Draw : $author$project$Types$Main$InProgress))))))));
 };
 var $author$project$Board$freezeBoard = F2(
 	function (freeze, board) {
@@ -5372,7 +5372,7 @@ var $author$project$Board$freezeBoard = F2(
 var $author$project$Board$freezeCell = function (cell) {
 	return _Utils_update(
 		cell,
-		{state: $author$project$Types$Inactive});
+		{state: $author$project$Types$Board$Inactive});
 };
 var $author$project$Board$freezeGame = F2(
 	function (freeze, game) {
@@ -5410,20 +5410,20 @@ var $author$project$Player$setDraws = function (player) {
 	return _Utils_update(
 		player,
 		{
-			draws: $author$project$Types$Draws(
+			draws: $author$project$Types$Player$Draws(
 				$author$project$Player$getStat(player.draws) + 1)
 		});
 };
 var $author$project$Player$setLevel = function (player) {
 	var winExp = $author$project$Player$getStat(player.wins) * 25;
-	var lossExp = $author$project$Player$getStat(player.losses);
-	var drawExp = $author$project$Player$getStat(player.draws) * 5;
+	var lossExp = $author$project$Player$getStat(player.losses) * 5;
+	var drawExp = $author$project$Player$getStat(player.draws) * 10;
 	var totalExp = (winExp + drawExp) + lossExp;
-	var playerLevel = ((totalExp / 100) | 0) + 1;
+	var playerLevel = ((totalExp / 50) | 0) + 1;
 	return _Utils_update(
 		player,
 		{
-			level: $author$project$Types$Level(playerLevel)
+			level: $author$project$Types$Player$Level(playerLevel)
 		});
 };
 var $author$project$Player$drawLevelUpdate = function (player) {
@@ -5444,7 +5444,7 @@ var $author$project$Player$setLosses = function (player) {
 	return _Utils_update(
 		player,
 		{
-			losses: $author$project$Types$Losses(
+			losses: $author$project$Types$Player$Losses(
 				$author$project$Player$getStat(player.losses) + 1)
 		});
 };
@@ -5475,7 +5475,7 @@ var $author$project$Player$setWins = function (player) {
 	return _Utils_update(
 		player,
 		{
-			wins: $author$project$Types$Wins(
+			wins: $author$project$Types$Player$Wins(
 				$author$project$Player$getStat(player.wins) + 1)
 		});
 };
@@ -5491,23 +5491,23 @@ var $author$project$Main$updateGameStatus = function (game) {
 			return $author$project$Board$freezeCells(
 				A2(
 					$author$project$Main$setGameStatus,
-					$author$project$Types$Victory,
+					$author$project$Types$Main$Victory,
 					$author$project$Player$updateWinLoss(game)));
 		case 'Draw':
 			return A2(
 				$author$project$Main$setGameStatus,
-				$author$project$Types$Draw,
+				$author$project$Types$Main$Draw,
 				$author$project$Player$updateDraws(game));
 		default:
 			var _v1 = game.playerTurn;
 			if (_v1.$ === 'Player1') {
 				return _Utils_update(
 					game,
-					{playerTurn: $author$project$Types$Player2});
+					{playerTurn: $author$project$Types$Main$Player2});
 			} else {
 				return _Utils_update(
 					game,
-					{playerTurn: $author$project$Types$Player1});
+					{playerTurn: $author$project$Types$Main$Player1});
 			}
 	}
 };
