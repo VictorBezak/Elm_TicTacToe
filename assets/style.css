@@ -101,12 +101,11 @@
 #victoryMsg, #drawMsg {
     display: grid;
     justify-content: center;
-    padding-top: 60px;
 }
 
 .gameOverText {
     font-size: 2em;
-    margin-bottom:18px;
+    margin-bottom: 24px;
 }
 
 .gameOverBtn {
@@ -148,7 +147,7 @@
 
 @media only screen and (max-width: 1000px) {
     #playerStats {
-        margin-bottom: 24px;
+        /* margin-bottom: 24px; */
     }
 
     #player1, #player2 {
@@ -162,17 +161,13 @@
         grid-template-rows: auto 3fr 1fr;
         grid-template-columns: 2fr 1fr;
     }
-
-    #header {
-        margin-bottom: 12px;
-    }
     
     #playerStats {
         flex-direction: column;
     }
 
     #player1, #player2 {
-        padding: 36px 0 12px;
+        padding: 36px 0;
     }
     
     #board > button {
@@ -203,13 +198,12 @@
     #header {
         grid-area: header;
         font-size: 0.8em;
-        margin-bottom: 24px;
+        margin-bottom: 12px;
     }
 
     #playerStats {
         grid-area: stats;
         flex-direction: row;
-        margin-bottom: 24px;
     }
 
     #player1, #player2 {
@@ -219,19 +213,19 @@
 
     #board {
         grid-area: board;
+        margin-bottom: 48px;
     }
 
     #board > button {
-        width: 20vw; height: 20vw;
+        width: 28vw; height: 28vw;
     }
 
     .gameOverDiv {
         grid-area: gameOver;
-        align-items: center;
+        /* align-items: flex; */
     }
 
     .gameOverText {
-        font-size: 1.25em;
-        margin-bottom: 24px;
+        font-size: 1.4em;
     }
 }
