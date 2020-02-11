@@ -1,4 +1,4 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Browser
 import Html exposing (Html, div, section, header, h1, h2, p, text, button)
@@ -6,6 +6,7 @@ import Html.Attributes exposing (id, class)
 import Html.Events exposing (onClick)
 import Player exposing (..)
 import Board exposing (..)
+import Json.Encode as Encode
 
 import Types.Main exposing (Model, PlayerTurn(..), Status(..))
 import Types.Player exposing (Player, Stats(..))
@@ -235,6 +236,17 @@ nextTurn game =
             ( { game | playerTurn = Player1 }
             , Cmd.none
             )
+
+-- Ports
+port cachePlayerStats : Encode.Value -> Cmd a
+
+-- encodedModel : Encode.Value
+-- encodedModel =
+--     Encode.object
+--         [ ( "board"
+--             , Encode.object
+--                 [ ( "a1", )]
+--             ) ]
 
 
 ---------------------------------------------------------------------

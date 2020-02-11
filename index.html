@@ -12,19 +12,19 @@
 <body>
     <div id="app"></div>
     <script>
-        localforage.getItem("session", (err, session) => {
-            const app = Elm.Main.init({
-                node: document.getElementById("app"),
-                flags: session
-            });
+        const app = Elm.Main.init({ node: document.getElementById("app") });
+        // localforage.getItem("session", (err, session) => {
+            // const app = Elm.Main.init({
+            //     node: document.getElementById("app"),
+            //     flags: session
+            // });
 
-            app.ports.cachePlayerStats.subscribe((data) => {
-                // localforage.setItem("session", JSON.stringify(data), () => {
-                localforage.setItem("session", data, () => {
-                app.ports.onSessionChange.send(data)
-                });
-            });
-        });
+            // app.ports.cachePlayerStats.subscribe((data) => {
+            //     localforage.setItem("session", data, () => {
+            //     app.ports.onSessionChange.send(data)
+            //     });
+            // });
+        // });
     </script>
 </body>
 </html>
