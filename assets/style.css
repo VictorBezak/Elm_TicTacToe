@@ -126,6 +126,35 @@
     border: none;
 }
 
+@media only screen and (min-height: 1100px) {
+    .playerName {
+        font-size: 2.2em;
+    }
+    
+    .playerLevel {
+        font-size: 1.6em;
+    }
+    
+    .playerRecord {
+        font-size: 1.25em;
+    }
+}
+
+@media only screen and (min-height: 800px) {
+    .playerName {
+        font-size: 2em;
+    }
+    
+    .playerLevel {
+        margin-bottom: 12px;
+        font-size: 1.4em;
+    }
+    
+    .playerRecord {
+        font-size: 1.1em;
+    }
+}
+
 @media only screen and (min-width: 1400px) {
     #container {
         /* grid-template-columns: 2fr 3fr; */
@@ -181,6 +210,14 @@
     .gameOverDiv {
         grid-column: 1/3;
     }
+
+    .gameOverText {
+        font-size: 3em;
+    }
+
+    .gameOverBtn {
+        font-size: 1.4em;
+    }
 }
 
 @media only screen and (max-width: 540px) {
@@ -227,5 +264,21 @@
 
     .gameOverText {
         font-size: 1.4em;
+    }
+}
+
+@media only screen and (max-width: 420px) {
+    #board > button {
+        width: 24vw; height: 24vw;
+    }
+}
+
+@media only screen and (max-width: 380px) {
+    #board {
+        margin-bottom: 24px;
+    }
+
+    .gameOverBtn {
+        font-size: 1em;
     }
 }
