@@ -4355,61 +4355,6 @@ function _Browser_load(url)
 		}
 	}));
 }
-var $author$project$Types$Main$InProgress = {$: 'InProgress'};
-var $author$project$Types$Main$Player1 = {$: 'Player1'};
-var $author$project$Types$Board$A1 = {$: 'A1'};
-var $author$project$Types$Board$A2 = {$: 'A2'};
-var $author$project$Types$Board$A3 = {$: 'A3'};
-var $author$project$Types$Board$Active = {$: 'Active'};
-var $author$project$Types$Board$B1 = {$: 'B1'};
-var $author$project$Types$Board$B2 = {$: 'B2'};
-var $author$project$Types$Board$B3 = {$: 'B3'};
-var $author$project$Types$Board$C1 = {$: 'C1'};
-var $author$project$Types$Board$C2 = {$: 'C2'};
-var $author$project$Types$Board$C3 = {$: 'C3'};
-var $author$project$Types$Board$Empty = {$: 'Empty'};
-var $author$project$Board$emptyBoard = {
-	a1: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$A1, state: $author$project$Types$Board$Active},
-	a2: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$A2, state: $author$project$Types$Board$Active},
-	a3: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$A3, state: $author$project$Types$Board$Active},
-	b1: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$B1, state: $author$project$Types$Board$Active},
-	b2: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$B2, state: $author$project$Types$Board$Active},
-	b3: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$B3, state: $author$project$Types$Board$Active},
-	c1: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$C1, state: $author$project$Types$Board$Active},
-	c2: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$C2, state: $author$project$Types$Board$Active},
-	c3: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$C3, state: $author$project$Types$Board$Active}
-};
-var $author$project$Types$Player$Draws = function (a) {
-	return {$: 'Draws', a: a};
-};
-var $author$project$Types$Player$Level = function (a) {
-	return {$: 'Level', a: a};
-};
-var $author$project$Types$Player$Losses = function (a) {
-	return {$: 'Losses', a: a};
-};
-var $author$project$Types$Player$Player = F5(
-	function (username, level, wins, losses, draws) {
-		return {draws: draws, level: level, losses: losses, username: username, wins: wins};
-	});
-var $author$project$Types$Player$Wins = function (a) {
-	return {$: 'Wins', a: a};
-};
-var $author$project$Main$testPlayer1 = A5(
-	$author$project$Types$Player$Player,
-	'DevDood',
-	$author$project$Types$Player$Level(1),
-	$author$project$Types$Player$Wins(0),
-	$author$project$Types$Player$Losses(0),
-	$author$project$Types$Player$Draws(0));
-var $author$project$Main$testPlayer2 = A5(
-	$author$project$Types$Player$Player,
-	'DevDino',
-	$author$project$Types$Player$Level(1),
-	$author$project$Types$Player$Wins(0),
-	$author$project$Types$Player$Losses(0),
-	$author$project$Types$Player$Draws(0));
-var $author$project$Main$init = {board: $author$project$Board$emptyBoard, player1: $author$project$Main$testPlayer1, player2: $author$project$Main$testPlayer2, playerTurn: $author$project$Types$Main$Player1, status: $author$project$Types$Main$InProgress};
 var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
@@ -5198,33 +5143,80 @@ var $elm$core$Task$perform = F2(
 			$elm$core$Task$Perform(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
+var $elm$browser$Browser$element = _Browser_element;
+var $author$project$Types$Main$InProgress = {$: 'InProgress'};
+var $author$project$Types$Main$Player1 = {$: 'Player1'};
+var $author$project$Types$Board$A1 = {$: 'A1'};
+var $author$project$Types$Board$A2 = {$: 'A2'};
+var $author$project$Types$Board$A3 = {$: 'A3'};
+var $author$project$Types$Board$Active = {$: 'Active'};
+var $author$project$Types$Board$B1 = {$: 'B1'};
+var $author$project$Types$Board$B2 = {$: 'B2'};
+var $author$project$Types$Board$B3 = {$: 'B3'};
+var $author$project$Types$Board$C1 = {$: 'C1'};
+var $author$project$Types$Board$C2 = {$: 'C2'};
+var $author$project$Types$Board$C3 = {$: 'C3'};
+var $author$project$Types$Board$Empty = {$: 'Empty'};
+var $author$project$Board$emptyBoard = {
+	a1: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$A1, state: $author$project$Types$Board$Active},
+	a2: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$A2, state: $author$project$Types$Board$Active},
+	a3: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$A3, state: $author$project$Types$Board$Active},
+	b1: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$B1, state: $author$project$Types$Board$Active},
+	b2: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$B2, state: $author$project$Types$Board$Active},
+	b3: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$B3, state: $author$project$Types$Board$Active},
+	c1: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$C1, state: $author$project$Types$Board$Active},
+	c2: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$C2, state: $author$project$Types$Board$Active},
+	c3: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$C3, state: $author$project$Types$Board$Active}
+};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Types$Player$Draws = function (a) {
+	return {$: 'Draws', a: a};
+};
+var $author$project$Types$Player$Level = function (a) {
+	return {$: 'Level', a: a};
+};
+var $author$project$Types$Player$Losses = function (a) {
+	return {$: 'Losses', a: a};
+};
+var $author$project$Types$Player$Player = F5(
+	function (username, level, wins, losses, draws) {
+		return {draws: draws, level: level, losses: losses, username: username, wins: wins};
+	});
+var $author$project$Types$Player$Wins = function (a) {
+	return {$: 'Wins', a: a};
+};
+var $author$project$Main$testPlayer1 = A5(
+	$author$project$Types$Player$Player,
+	'DevDood',
+	$author$project$Types$Player$Level(1),
+	$author$project$Types$Player$Wins(0),
+	$author$project$Types$Player$Losses(0),
+	$author$project$Types$Player$Draws(0));
+var $author$project$Main$testPlayer2 = A5(
+	$author$project$Types$Player$Player,
+	'DevDino',
+	$author$project$Types$Player$Level(1),
+	$author$project$Types$Player$Wins(0),
+	$author$project$Types$Player$Losses(0),
+	$author$project$Types$Player$Draws(0));
+var $author$project$Main$init = function (_v0) {
+	return _Utils_Tuple2(
+		{board: $author$project$Board$emptyBoard, player1: $author$project$Main$testPlayer1, player2: $author$project$Main$testPlayer2, playerTurn: $author$project$Types$Main$Player1, status: $author$project$Types$Main$InProgress},
+		$elm$core$Platform$Cmd$none);
+};
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $elm$browser$Browser$sandbox = function (impl) {
-	return _Browser_element(
-		{
-			init: function (_v0) {
-				return _Utils_Tuple2(impl.init, $elm$core$Platform$Cmd$none);
-			},
-			subscriptions: function (_v1) {
-				return $elm$core$Platform$Sub$none;
-			},
-			update: F2(
-				function (msg, model) {
-					return _Utils_Tuple2(
-						A2(impl.update, msg, model),
-						$elm$core$Platform$Cmd$none);
-				}),
-			view: impl.view
-		});
+var $author$project$Main$subscriptions = function (_v0) {
+	return $elm$core$Platform$Sub$none;
 };
 var $author$project$Board$resetBoard = F2(
 	function (reset, game) {
-		return _Utils_update(
-			game,
-			{board: reset, status: $author$project$Types$Main$InProgress});
+		return _Utils_Tuple2(
+			_Utils_update(
+				game,
+				{board: reset, status: $author$project$Types$Main$InProgress}),
+			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Types$Board$Inactive = {$: 'Inactive'};
 var $author$project$Types$Board$O = {$: 'O'};
@@ -5319,7 +5311,6 @@ var $author$project$Board$updateCell = F2(
 				$author$project$Board$setCell(model)));
 	});
 var $author$project$Types$Main$Draw = {$: 'Draw'};
-var $author$project$Types$Main$Player2 = {$: 'Player2'};
 var $author$project$Types$Main$Victory = {$: 'Victory'};
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
@@ -5384,11 +5375,30 @@ var $author$project$Board$freezeGame = F2(
 	});
 var $author$project$Board$freezeCells = $author$project$Board$freezeGame(
 	$author$project$Board$freezeBoard($author$project$Board$freezeCell));
+var $author$project$Types$Main$Player2 = {$: 'Player2'};
+var $author$project$Main$nextTurn = function (game) {
+	var _v0 = game.playerTurn;
+	if (_v0.$ === 'Player1') {
+		return _Utils_Tuple2(
+			_Utils_update(
+				game,
+				{playerTurn: $author$project$Types$Main$Player2}),
+			$elm$core$Platform$Cmd$none);
+	} else {
+		return _Utils_Tuple2(
+			_Utils_update(
+				game,
+				{playerTurn: $author$project$Types$Main$Player1}),
+			$elm$core$Platform$Cmd$none);
+	}
+};
 var $author$project$Main$setGameStatus = F2(
 	function (conclusion, game) {
-		return _Utils_update(
-			game,
-			{status: conclusion});
+		return _Utils_Tuple2(
+			_Utils_update(
+				game,
+				{status: conclusion}),
+			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Player$getStat = function (stat) {
 	switch (stat.$) {
@@ -5488,10 +5498,10 @@ var $author$project$Main$updateGameStatus = function (game) {
 	var _v0 = $author$project$Main$checkEndgameConditions(game);
 	switch (_v0.$) {
 		case 'Victory':
-			return $author$project$Board$freezeCells(
-				A2(
-					$author$project$Main$setGameStatus,
-					$author$project$Types$Main$Victory,
+			return A2(
+				$author$project$Main$setGameStatus,
+				$author$project$Types$Main$Victory,
+				$author$project$Board$freezeCells(
 					$author$project$Player$updateWinLoss(game)));
 		case 'Draw':
 			return A2(
@@ -5499,16 +5509,7 @@ var $author$project$Main$updateGameStatus = function (game) {
 				$author$project$Types$Main$Draw,
 				$author$project$Player$updateDraws(game));
 		default:
-			var _v1 = game.playerTurn;
-			if (_v1.$ === 'Player1') {
-				return _Utils_update(
-					game,
-					{playerTurn: $author$project$Types$Main$Player2});
-			} else {
-				return _Utils_update(
-					game,
-					{playerTurn: $author$project$Types$Main$Player1});
-			}
+			return $author$project$Main$nextTurn(game);
 	}
 };
 var $author$project$Main$update = F2(
@@ -5520,7 +5521,7 @@ var $author$project$Main$update = F2(
 				return $author$project$Main$updateGameStatus(
 					A3($author$project$Board$updateCell, game, cell, game));
 			} else {
-				return game;
+				return _Utils_Tuple2(game, $elm$core$Platform$Cmd$none);
 			}
 		} else {
 			return A2($author$project$Board$resetBoard, $author$project$Board$emptyBoard, game);
@@ -6007,7 +6008,7 @@ var $author$project$Main$view = function (game) {
 				$author$project$Main$viewGameOverMessage(game)
 			]));
 };
-var $author$project$Main$main = $elm$browser$Browser$sandbox(
-	{init: $author$project$Main$init, update: $author$project$Main$update, view: $author$project$Main$view});
+var $author$project$Main$main = $elm$browser$Browser$element(
+	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));

@@ -32,9 +32,11 @@ emptyBoard =
     , c3 = { id = C3, content = Empty, state = Active }
     }
 
-resetBoard : Board -> Model -> Model
+resetBoard : Board -> Model -> (Model, Cmd a)
 resetBoard reset game =
-    { game | board = reset, status = InProgress }
+    ( { game | board = reset, status = InProgress }
+    , Cmd.none
+    )
 
 updateCell : Model -> Cell -> Model -> Model
 updateCell model cell =

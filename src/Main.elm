@@ -20,14 +20,16 @@ testPlayer1 = Player "DevDood" (Level 1) (Wins 0) (Losses 0) (Draws 0)
 testPlayer2 : Player
 testPlayer2 = Player "DevDino" (Level 1) (Wins 0) (Losses 0) (Draws 0)
 
-init : Model
-init =
-    { board = Board.emptyBoard
-    , player1 = testPlayer1
-    , player2 = testPlayer2
-    , playerTurn = Player1
-    , status = InProgress
-    }
+init : flags -> (Model, Cmd msg)
+init _ =
+    ( { board = Board.emptyBoard
+        , player1 = testPlayer1
+        , player2 = testPlayer2
+        , playerTurn = Player1
+        , status = InProgress
+        }
+    , Cmd.none
+    )
 
 
 ---------------------------------------------------------------------
@@ -143,7 +145,7 @@ type Msg
     = CellClicked Cell
     | ResetGame
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd a)
 update msg game =
     case msg of
         CellClicked cell ->
@@ -154,7 +156,7 @@ update msg game =
                         |> updateGameStatus
 
                 Inactive ->
-                    game
+                    ( game, Cmd.none )
 
         ResetGame ->
             game
@@ -162,14 +164,14 @@ update msg game =
 
 
 -- Update Helper Functions
-updateGameStatus : Model -> Model
+updateGameStatus : Model -> (Model, Cmd a)
 updateGameStatus game =
     case checkEndgameConditions game of
         Victory ->
             game
                 |> updateWinLoss
-                |> setGameStatus Victory
                 |> freezeCells
+                |> setGameStatus Victory
         
         Draw ->
             game
@@ -177,12 +179,8 @@ updateGameStatus game =
                 |> setGameStatus Draw
 
         InProgress ->
-            case game.playerTurn of
-                Player1 ->
-                    { game | playerTurn = Player2 }
-                
-                Player2 ->
-                    { game | playerTurn = Player1 }
+            game
+                |> nextTurn
 
 checkEndgameConditions : Model -> Status
 checkEndgameConditions game =
@@ -219,9 +217,24 @@ checkEndgameConditions game =
         else if List.length emptyCellList == 0 then Draw
         else InProgress
 
-setGameStatus : Status -> Model -> Model
-setGameStatus conclusion game =
-    { game | status = conclusion }
+setGameStatus : Status -> Model -> (Model, Cmd a)
+setGameStatus conclusion game =    
+    ( { game | status = conclusion }
+    , Cmd.none
+    )
+
+nextTurn : Model -> (Model, Cmd a)
+nextTurn game =
+    case game.playerTurn of
+        Player1 ->
+            ( { game | playerTurn = Player2 }
+            , Cmd.none
+            )
+        
+        Player2 ->
+            ( { game | playerTurn = Player1 }
+            , Cmd.none
+            )
 
 
 ---------------------------------------------------------------------
@@ -229,8 +242,13 @@ setGameStatus conclusion game =
 
 main : Program () Model Msg
 main =
-    Browser.sandbox
+    Browser.element
         { init = init
         , view = view
         , update = update
+        , subscriptions = subscriptions
         }
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Sub.none
