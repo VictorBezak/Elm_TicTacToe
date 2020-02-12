@@ -2,11 +2,12 @@ port module Main exposing (main)
 
 import Browser
 import Html exposing (Html, div, section, header, h1, h2, p, text, button)
-import Html.Attributes exposing (id, class)
+import Html.Attributes exposing (id, class, style)
 import Html.Events exposing (onClick)
 import Player exposing (..)
 import Board exposing (..)
 import Json.Encode as Encode
+import Json.Decode as Decode
 
 import Types.Main exposing (Model, PlayerTurn(..), Status(..))
 import Types.Player exposing (Player, Stats(..))
@@ -21,13 +22,27 @@ testPlayer1 = Player "DevDood" (Level 1) (Wins 0) (Losses 0) (Draws 0)
 testPlayer2 : Player
 testPlayer2 = Player "DevDino" (Level 1) (Wins 0) (Losses 0) (Draws 0)
 
-init : flags -> (Model, Cmd msg)
-init _ =
+init : String -> (Model, Cmd msg)
+init strInt =
+    let
+        result : Result Decode.Error Int
+        result = Decode.decodeString Decode.int strInt
+
+        decodedInt : Int
+        decodedInt =
+            case result of
+                Ok value ->
+                    value
+                Err error ->
+                    0
+    in
+    
     ( { board = Board.emptyBoard
-        , player1 = testPlayer1
-        , player2 = testPlayer2
+        , player1 = testPlayer1  -- Cached player1
+        , player2 = testPlayer2  -- Cached player2
         , playerTurn = Player1
         , status = InProgress
+        , cacheRetrieve = decodedInt  -- For TEST caching
         }
     , Cmd.none
     )
@@ -64,7 +79,7 @@ view game =
     in
         div [ id "container" ]
             [ header [ id "header" ]
-                [ h1 [ id "title" ] [ text "Tic-Tac-Toe" ]
+                [ h1 [ id "title" ] [ text ("Tic-Tac-Toe") ]
                 ]
             , section [ id "board" ]
                 [ button [ onClick (CellClicked a1), class (viewState a1.state) ] [ text (viewContent a1.content) ]
@@ -93,7 +108,10 @@ view game =
                     , p [ class "playerRecord" ] [ text p2_draws ]
                     ]
                 ]
-            , viewGameOverMessage game
+            , div []
+                [ div [ id "cacheRetrieve", style "font-size" "4em", style "text-align" "center" ] [ text (String.fromInt game.cacheRetrieve) ]
+                , viewGameOverMessage game
+                ]
             ]
 
 
@@ -221,7 +239,7 @@ checkEndgameConditions game =
 setGameStatus : Status -> Model -> (Model, Cmd a)
 setGameStatus conclusion game =    
     ( { game | status = conclusion }
-    , Cmd.none
+    , cachePlayerStats (Encode.int 4)
     )
 
 nextTurn : Model -> (Model, Cmd a)
@@ -239,6 +257,7 @@ nextTurn game =
 
 -- Ports
 port cachePlayerStats : Encode.Value -> Cmd a
+-- port incoming : (Encode.Value -> a) -> Sub a
 
 -- encodedModel : Encode.Value
 -- encodedModel =
@@ -252,7 +271,7 @@ port cachePlayerStats : Encode.Value -> Cmd a
 ---------------------------------------------------------------------
 -- MAIN
 
-main : Program () Model Msg
+main : Program (String) Model Msg
 main =
     Browser.element
         { init = init

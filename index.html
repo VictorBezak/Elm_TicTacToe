@@ -6,24 +6,30 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Tic-Tac-Toe!</title>
     <link rel="stylesheet" href="assets/style.css">
-    <script src="localforage.js"></script>
+    <!-- <script src="localforage.js"></script> -->
     <script src="elm.js"></script>
 </head>
 <body>
     <div id="app"></div>
     <script>
-        const app = Elm.Main.init({ node: document.getElementById("app") });
+        let session = localStorage.getItem("session");
+        const app = Elm.Main.init(
+            { node: document.getElementById("app")
+            , flags: session
+            }
+        );
         // localforage.getItem("session", (err, session) => {
             // const app = Elm.Main.init({
             //     node: document.getElementById("app"),
             //     flags: session
             // });
 
-            // app.ports.cachePlayerStats.subscribe((data) => {
-            //     localforage.setItem("session", data, () => {
-            //     app.ports.onSessionChange.send(data)
-            //     });
-            // });
+            app.ports.cachePlayerStats.subscribe((data) => {
+                window.localStorage.setItem("session", data);
+                // app.ports.onSessionChange.send(data)
+                console.log("Successful cache!");
+            });
+        // });
         // });
     </script>
 </body>

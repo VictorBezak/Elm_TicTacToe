@@ -5146,6 +5146,7 @@ var $elm$core$Task$perform = F2(
 var $elm$browser$Browser$element = _Browser_element;
 var $author$project$Types$Main$InProgress = {$: 'InProgress'};
 var $author$project$Types$Main$Player1 = {$: 'Player1'};
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $author$project$Types$Board$A1 = {$: 'A1'};
 var $author$project$Types$Board$A2 = {$: 'A2'};
 var $author$project$Types$Board$A3 = {$: 'A3'};
@@ -5168,6 +5169,7 @@ var $author$project$Board$emptyBoard = {
 	c2: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$C2, state: $author$project$Types$Board$Active},
 	c3: {content: $author$project$Types$Board$Empty, id: $author$project$Types$Board$C3, state: $author$project$Types$Board$Active}
 };
+var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Types$Player$Draws = function (a) {
@@ -5200,11 +5202,22 @@ var $author$project$Main$testPlayer2 = A5(
 	$author$project$Types$Player$Wins(0),
 	$author$project$Types$Player$Losses(0),
 	$author$project$Types$Player$Draws(0));
-var $author$project$Main$init = function (_v0) {
+var $author$project$Main$init = function (strInt) {
+	var result = A2($elm$json$Json$Decode$decodeString, $elm$json$Json$Decode$int, strInt);
+	var decodedInt = function () {
+		if (result.$ === 'Ok') {
+			var value = result.a;
+			return value;
+		} else {
+			var error = result.a;
+			return 0;
+		}
+	}();
 	return _Utils_Tuple2(
-		{board: $author$project$Board$emptyBoard, player1: $author$project$Main$testPlayer1, player2: $author$project$Main$testPlayer2, playerTurn: $author$project$Types$Main$Player1, status: $author$project$Types$Main$InProgress},
+		{board: $author$project$Board$emptyBoard, cacheRetrieve: decodedInt, player1: $author$project$Main$testPlayer1, player2: $author$project$Main$testPlayer2, playerTurn: $author$project$Types$Main$Player1, status: $author$project$Types$Main$InProgress},
 		$elm$core$Platform$Cmd$none);
 };
+var $elm$json$Json$Decode$string = _Json_decodeString;
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (_v0) {
@@ -5392,13 +5405,16 @@ var $author$project$Main$nextTurn = function (game) {
 			$elm$core$Platform$Cmd$none);
 	}
 };
+var $author$project$Main$cachePlayerStats = _Platform_outgoingPort('cachePlayerStats', $elm$core$Basics$identity);
+var $elm$json$Json$Encode$int = _Json_wrap;
 var $author$project$Main$setGameStatus = F2(
 	function (conclusion, game) {
 		return _Utils_Tuple2(
 			_Utils_update(
 				game,
 				{status: conclusion}),
-			$elm$core$Platform$Cmd$none);
+			$author$project$Main$cachePlayerStats(
+				$elm$json$Json$Encode$int(4)));
 	});
 var $author$project$Player$getStat = function (stat) {
 	switch (stat.$) {
@@ -5564,6 +5580,8 @@ var $elm$html$Html$Events$onClick = function (msg) {
 };
 var $elm$html$Html$p = _VirtualDom_node('p');
 var $elm$html$Html$section = _VirtualDom_node('section');
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Board$viewContent = function (content) {
@@ -6005,10 +6023,28 @@ var $author$project$Main$view = function (game) {
 									]))
 							]))
 					])),
-				$author$project$Main$viewGameOverMessage(game)
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$id('cacheRetrieve'),
+								A2($elm$html$Html$Attributes$style, 'font-size', '4em'),
+								A2($elm$html$Html$Attributes$style, 'text-align', 'center')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								$elm$core$String$fromInt(game.cacheRetrieve))
+							])),
+						$author$project$Main$viewGameOverMessage(game)
+					]))
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$string)(0)}});}(this));

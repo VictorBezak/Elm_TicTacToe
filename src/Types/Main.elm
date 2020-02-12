@@ -10,6 +10,7 @@ type alias Model =
     , player2 : Player
     , playerTurn : PlayerTurn
     , status : Status
+    , cacheRetrieve : Int
     }
 
 type PlayerTurn
