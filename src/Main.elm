@@ -1,13 +1,15 @@
-port module Main exposing (main)
+module Main exposing (main)
 
 import Browser
 import Html exposing (Html, div, section, header, h1, h2, p, text, button)
 import Html.Attributes exposing (id, class, style)
 import Html.Events exposing (onClick)
-import Player exposing (..)
-import Board exposing (..)
 import Json.Encode as Encode
 import Json.Decode as Decode
+
+import Player exposing (..)
+import Board exposing (..)
+import Ports exposing (..)
 
 import Types.Main exposing (Model, PlayerTurn(..), Status(..))
 import Types.Player exposing (Player, Stats(..))
@@ -17,24 +19,27 @@ import Types.Board exposing (Cell, Id(..), Content(..), State(..))
 ---------------------------------------------------------------------
 -- MODEL
 
-testPlayer1 : Player  -- temporarily hardcoded. will remove if account creating is enabled
-testPlayer1 = Player "DevDood" (Level 1) (Wins 0) (Losses 0) (Draws 0)
-testPlayer2 : Player
-testPlayer2 = Player "DevDino" (Level 1) (Wins 0) (Losses 0) (Draws 0)
-
-init : String -> (Model, Cmd msg)
-init strInt =
+init : Maybe Uncache -> (Model, Cmd msg)
+init flag =
     let
-        result : Result Decode.Error Int
-        result = Decode.decodeString Decode.int strInt
+        -- result : Result Decode.Error Int
+        -- result = Decode.decodeString Decode.int strInt
 
-        decodedInt : Int
-        decodedInt =
-            case result of
-                Ok value ->
-                    value
-                Err error ->
-                    0
+        items : UncachedItems
+        items =
+            case flag of
+                Just data ->
+                    uncache data
+                
+                Nothing ->
+                    defaultItems
+
+        testPlayer1 : Player  -- temporarily hardcoded. will remove if account creating is enabled
+        testPlayer1 = Player "DevDood" (Level items.p1_level) (Wins items.p1_win) (Losses items.p1_loss) (Draws items.p1_draw)
+
+        testPlayer2 : Player
+        testPlayer2 = Player "DevDino" (Level items.p2_level) (Wins items.p2_win) (Losses items.p2_loss) (Draws items.p2_draw)
+        
     in
     
     ( { board = Board.emptyBoard
@@ -42,7 +47,7 @@ init strInt =
         , player2 = testPlayer2  -- Cached player2
         , playerTurn = Player1
         , status = InProgress
-        , cacheRetrieve = decodedInt  -- For TEST caching
+        -- , cacheRetrieve = cacheBack  -- For TEST caching
         }
     , Cmd.none
     )
@@ -54,6 +59,17 @@ init strInt =
 view : Model -> Html Msg
 view game =
     let
+        -- player1 = game.player1
+        -- p1_level = "Level:   " ++ viewStat player1.level
+        -- p1_wins = "Wins:   " ++ viewStat player1.wins
+        -- p1_losses = "Losses: " ++ viewStat player1.losses
+        -- p1_draws = "Draws:  " ++ viewStat player1.draws
+
+        -- player2 = game.player2
+        -- p2_level = "Level:   " ++ viewStat player2.level
+        -- p2_wins = "Wins:   " ++ viewStat player2.wins
+        -- p2_losses = "Losses: " ++ viewStat player2.losses
+        -- p2_draws = "Draws:  " ++ viewStat player2.draws
         player1 = game.player1
         p1_level = "Level:   " ++ viewStat player1.level
         p1_wins = "Wins:   " ++ viewStat player1.wins
@@ -94,24 +110,25 @@ view game =
                 ]
             , div [ id "playerStats" ]
                 [ div [ id "player1" ]
-                    [ h2 [ class "playerName" ] [ text player1.username ]
+                    [ h2 [ class "playerName" ] [ text game.player1.username ]
                     , p [ class "playerLevel" ] [ text p1_level ]
                     , p [ class "playerRecord" ] [ text p1_wins ]
                     , p [ class "playerRecord" ] [ text p1_losses ]
                     , p [ class "playerRecord" ] [ text p1_draws ]
                     ]
                 , div [ id "player2" ]
-                    [ h2 [ class "playerName" ] [ text player2.username ]
+                    [ h2 [ class "playerName" ] [ text game.player2.username ]
                     , p [ class "playerLevel" ] [ text p2_level ]
                     , p [ class "playerRecord" ] [ text p2_wins ]
                     , p [ class "playerRecord" ] [ text p2_losses ]
                     , p [ class "playerRecord" ] [ text p2_draws ]
                     ]
                 ]
-            , div []
-                [ div [ id "cacheRetrieve", style "font-size" "4em", style "text-align" "center" ] [ text (String.fromInt game.cacheRetrieve) ]
-                , viewGameOverMessage game
-                ]
+            , viewGameOverMessage game
+            -- , div []
+            --     [ div [ id "cacheRetrieve", style "font-size" "4em", style "text-align" "center" ] [ text (String.fromInt game.cacheRetrieve) ]
+            --     , viewGameOverMessage game
+            --     ]
             ]
 
 
@@ -239,7 +256,7 @@ checkEndgameConditions game =
 setGameStatus : Status -> Model -> (Model, Cmd a)
 setGameStatus conclusion game =    
     ( { game | status = conclusion }
-    , cachePlayerStats (Encode.int 4)
+    , cacheInt 4
     )
 
 nextTurn : Model -> (Model, Cmd a)
@@ -255,23 +272,11 @@ nextTurn game =
             , Cmd.none
             )
 
--- Ports
-port cachePlayerStats : Encode.Value -> Cmd a
--- port incoming : (Encode.Value -> a) -> Sub a
-
--- encodedModel : Encode.Value
--- encodedModel =
---     Encode.object
---         [ ( "board"
---             , Encode.object
---                 [ ( "a1", )]
---             ) ]
-
 
 ---------------------------------------------------------------------
 -- MAIN
 
-main : Program (String) Model Msg
+main : Program (Maybe Uncache) Model Msg
 main =
     Browser.element
         { init = init

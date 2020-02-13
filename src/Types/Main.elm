@@ -3,6 +3,8 @@ module Types.Main exposing (Model, PlayerTurn(..), Status(..))
 import Types.Player exposing (Player)
 import Types.Board exposing (Board)
 
+-- type alias Cache =
+--     { w : Int, l : Int, d : Int }
 
 type alias Model =
     { board : Board
@@ -10,7 +12,7 @@ type alias Model =
     , player2 : Player
     , playerTurn : PlayerTurn
     , status : Status
-    , cacheRetrieve : Int
+    -- , cacheRetrieve : Cache
     }
 
 type PlayerTurn
