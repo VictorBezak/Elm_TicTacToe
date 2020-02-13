@@ -39,7 +39,7 @@ button {
     text-align: center;
 }
 
-#playerStats {
+#playersDiv {
     grid-column: 2/3;
     align-self: center;
     justify-self: center;
@@ -141,6 +141,38 @@ button {
     border: none;
 }
 
+/* CURRENT QUERIES
+
+min-height: 1100px
+min-height: 800px
+
+min-width: 1400px
+
+<default between 1000-1400px>
+
+max-width: 1000px --> LAPTOP LAYOUT
+max-width: 800px  --> PLAYERS GO VERTICAL, GAMEOVER GO UNDER
+max-width: 540px  --> MOBILE VIEW
+max-width: 420px
+max-width: 380px
+*/
+
+/* BROKEN AT
+
+320 x 568 --> iPhone 5/SE --> gameOverDiv is getting pushed out of bottom
+1024 x 1366 --> iPad Pro --> too much top-bottom whitespace
+*/
+
+/* TEST QUERIES
+
+min-width: 2560px
+min-width: 1440px
+min-width: 1024px
+min-width: 768px
+min-width: 425px
+min-width: 375px
+min-width: 320px
+*/
 @media only screen and (min-height: 1100px) {
     .playerName {
         font-size: 2.2em;
@@ -190,7 +222,7 @@ button {
 }
 
 @media only screen and (max-width: 1000px) {
-    #playerStats {
+    #playersDiv {
         /* margin-bottom: 24px; */
     }
 
@@ -206,7 +238,7 @@ button {
         grid-template-columns: 2fr 1fr;
     }
     
-    #playerStats {
+    #playersDiv {
         flex-direction: column;
     }
 
@@ -253,7 +285,7 @@ button {
         margin-bottom: 12px;
     }
 
-    #playerStats {
+    #playersDiv {
         grid-area: stats;
         flex-direction: row;
     }
