@@ -243,7 +243,7 @@ button {
             "board"
             "gameOver";
 
-        grid-template-columns: unset;
+        grid-template-columns: auto;
         grid-template-rows: auto auto 2fr 1fr;
     }
 
