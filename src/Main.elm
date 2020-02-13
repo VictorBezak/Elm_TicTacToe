@@ -2,10 +2,9 @@ module Main exposing (main)
 
 import Browser
 import Html exposing (Html, div, section, header, h1, h2, p, text, button)
-import Html.Attributes exposing (id, class, style)
+import Html.Attributes exposing (id, class)
 import Html.Events exposing (onClick)
 import Json.Encode as Encode
-import Json.Decode as Decode
 
 import Player exposing (..)
 import Board exposing (..)
@@ -19,20 +18,22 @@ import Types.Board exposing (Cell, Id(..), Content(..), State(..))
 ---------------------------------------------------------------------
 -- MODEL
 
-init : Maybe Uncache -> (Model, Cmd msg)
+init : Maybe Encode.Value -> (Model, Cmd msg)
 init flag =
     let
-        -- result : Result Decode.Error Int
-        -- result = Decode.decodeString Decode.int strInt
-
         items : UncachedItems
         items =
             case flag of
                 Just data ->
-                    uncache data
+                    case decode data of
+                        Ok obj ->
+                            obj
+                        
+                        Err _ ->
+                            defaultData
                 
                 Nothing ->
-                    defaultItems
+                    defaultData
 
         testPlayer1 : Player  -- temporarily hardcoded. will remove if account creating is enabled
         testPlayer1 = Player "DevDood" (Level items.p1_level) (Wins items.p1_win) (Losses items.p1_loss) (Draws items.p1_draw)
@@ -47,7 +48,6 @@ init flag =
         , player2 = testPlayer2  -- Cached player2
         , playerTurn = Player1
         , status = InProgress
-        -- , cacheRetrieve = cacheBack  -- For TEST caching
         }
     , Cmd.none
     )
@@ -59,17 +59,6 @@ init flag =
 view : Model -> Html Msg
 view game =
     let
-        -- player1 = game.player1
-        -- p1_level = "Level:   " ++ viewStat player1.level
-        -- p1_wins = "Wins:   " ++ viewStat player1.wins
-        -- p1_losses = "Losses: " ++ viewStat player1.losses
-        -- p1_draws = "Draws:  " ++ viewStat player1.draws
-
-        -- player2 = game.player2
-        -- p2_level = "Level:   " ++ viewStat player2.level
-        -- p2_wins = "Wins:   " ++ viewStat player2.wins
-        -- p2_losses = "Losses: " ++ viewStat player2.losses
-        -- p2_draws = "Draws:  " ++ viewStat player2.draws
         player1 = game.player1
         p1_level = "Level:   " ++ viewStat player1.level
         p1_wins = "Wins:   " ++ viewStat player1.wins
@@ -95,7 +84,7 @@ view game =
     in
         div [ id "container" ]
             [ header [ id "header" ]
-                [ h1 [ id "title" ] [ text ("Tic-Tac-Toe") ]
+                [ h1 [ id "title" ] [ text "Tic-Tac-Toe" ]
                 ]
             , section [ id "board" ]
                 [ button [ onClick (CellClicked a1), class (viewState a1.state) ] [ text (viewContent a1.content) ]
@@ -125,10 +114,6 @@ view game =
                     ]
                 ]
             , viewGameOverMessage game
-            -- , div []
-            --     [ div [ id "cacheRetrieve", style "font-size" "4em", style "text-align" "center" ] [ text (String.fromInt game.cacheRetrieve) ]
-            --     , viewGameOverMessage game
-            --     ]
             ]
 
 
@@ -256,7 +241,7 @@ checkEndgameConditions game =
 setGameStatus : Status -> Model -> (Model, Cmd a)
 setGameStatus conclusion game =    
     ( { game | status = conclusion }
-    , cacheInt 4
+    , cache game
     )
 
 nextTurn : Model -> (Model, Cmd a)
@@ -276,7 +261,7 @@ nextTurn game =
 ---------------------------------------------------------------------
 -- MAIN
 
-main : Program (Maybe Uncache) Model Msg
+main : Program (Maybe Encode.Value) Model Msg
 main =
     Browser.element
         { init = init
