@@ -3,10 +3,6 @@ module Player exposing (viewStat, getStat, updateWinLoss, updateDraws)
 import Types.Main exposing (Model, PlayerTurn(..))
 import Types.Player exposing (Player, Stats(..))
 
--- port module Player exposing (..)
--- import Json.Encode as Encode
--- port cache : Encode.Value -> Cmd msg
-
 
 ---------------------------------------------------------------------
 -- Public Functions
