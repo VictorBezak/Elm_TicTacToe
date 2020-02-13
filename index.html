@@ -12,7 +12,6 @@
 <body>
     <div id="app"></div>
     <script>
-
         localforage.getItem("player").then( (session) => {
             const app = Elm.Main.init({
                 node: document.getElementById("app"),
