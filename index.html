@@ -13,23 +13,24 @@
     <div id="app"></div>
     <script>
 
-        localforage.getItem("player", (err, session) => {
+        localforage.getItem("player").then( (session) => {
             const app = Elm.Main.init({
                 node: document.getElementById("app"),
                 flags: session
-            });
-
-            // app.ports.cacheInt.subscribe((data) => {
-            //     localforage.setItem("cachedInt", data, () => {
-            //         console.log("successful int cache!")
-            //     });
-            // });
+            })
+            console.log("Player cache successfully retrieved.");
 
             app.ports.cachePlayer.subscribe((data) => {
-                localforage.setItem("player", data, () => {
-                    console.log("successful player cache!")
-                });
+            localforage.setItem("player", data, () => {
+                console.log("Player successfully cached.")
             });
+        });
+        }).catch( (err) => {
+            const app = Elm.Main.init({
+                node: document.getElementById("app")
+            });
+            console.log("Failed to retrieve player cache.");
+            console.log(err);
         });
     </script>
 </body>

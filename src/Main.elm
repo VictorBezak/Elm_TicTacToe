@@ -2,10 +2,9 @@ module Main exposing (main)
 
 import Browser
 import Html exposing (Html, div, section, header, h1, h2, p, text, button)
-import Html.Attributes exposing (id, class, style)
+import Html.Attributes exposing (id, class)
 import Html.Events exposing (onClick)
 import Json.Encode as Encode
-import Json.Decode as Decode
 
 import Player exposing (..)
 import Board exposing (..)
@@ -19,20 +18,22 @@ import Types.Board exposing (Cell, Id(..), Content(..), State(..))
 ---------------------------------------------------------------------
 -- MODEL
 
-init : Maybe Uncache -> (Model, Cmd msg)
+init : Maybe Encode.Value -> (Model, Cmd msg)
 init flag =
     let
-        -- result : Result Decode.Error Int
-        -- result = Decode.decodeString Decode.int strInt
-
         items : UncachedItems
         items =
             case flag of
                 Just data ->
-                    uncache data
+                    case decode data of
+                        Ok obj ->
+                            obj
+                        
+                        Err _ ->
+                            defaultData
                 
                 Nothing ->
-                    defaultItems
+                    defaultData
 
         testPlayer1 : Player  -- temporarily hardcoded. will remove if account creating is enabled
         testPlayer1 = Player "DevDood" (Level items.p1_level) (Wins items.p1_win) (Losses items.p1_loss) (Draws items.p1_draw)
@@ -47,7 +48,6 @@ init flag =
         , player2 = testPlayer2  -- Cached player2
         , playerTurn = Player1
         , status = InProgress
-        -- , cacheRetrieve = cacheBack  -- For TEST caching
         }
     , Cmd.none
     )
@@ -256,7 +256,7 @@ checkEndgameConditions game =
 setGameStatus : Status -> Model -> (Model, Cmd a)
 setGameStatus conclusion game =    
     ( { game | status = conclusion }
-    , cacheInt 4
+    , cache game
     )
 
 nextTurn : Model -> (Model, Cmd a)
@@ -276,7 +276,7 @@ nextTurn game =
 ---------------------------------------------------------------------
 -- MAIN
 
-main : Program (Maybe Uncache) Model Msg
+main : Program (Maybe Encode.Value) Model Msg
 main =
     Browser.element
         { init = init
