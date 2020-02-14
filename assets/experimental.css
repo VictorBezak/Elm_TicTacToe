@@ -9,7 +9,7 @@
 
 button {
     outline: none;
-    /* border: none; */
+    border: none;
     cursor: pointer;
 }
 
@@ -20,57 +20,35 @@ button {
 #container {
     height: 100vh;
     display: grid;
-    /* grid-template-rows: auto 1fr 1fr;
-    grid-template-columns: 1fr 1fr; */
 }
 
 #header {
-    /* grid-column: 1/3; */
-    /* display: grid;
-    grid-template-columns: 1fr auto 1fr; */
+    margin-bottom: 6px;
     background: #dddddd;
-    padding: 12px 0;
-    box-shadow: 0 -5px 10px black;
 }
 
 #title {
-    /* grid-column: 2/3; */
-    /* align-self: center; */
     color: #222222;
-    /* font-size: 3em; */
     text-align: center;
 }
 
 #playersDiv {
-    /* grid-column: 2/3; */
-    align-self: center;
     justify-self: center;
+    align-self: center;
+    width: 100%;
     display: flex;
+    justify-content: space-evenly;
 }
 
 #player1, #player2 {
     display: grid;
-    /* padding: 48px 36px 12px;
-    font-size: 1.2em; */
-    font-family: Arial, Helvetica, sans-serif;
 }
-
-/* .playerName {
-    font-size: 1.8em;
-} */
-
-/* .playerLevel {
-    margin-bottom: 6px;
-    font-size: 1.25em;
-} */
 
 .playerRecord {
     font-style: italic;
 }
 
 #board {
-    /* grid-column: 1/2;
-    grid-row: 2/4; */
     justify-self: center;
     align-self: center;
     display: grid;
@@ -80,9 +58,6 @@ button {
 }
 
 #board > button {
-    /* font-size: 2.4em;
-    width: 14vw; height: 14vw; */
-    max-width: 150px; max-height: 150px;
     min-width: 80px; min-height: 80px;
 }
 
@@ -99,9 +74,9 @@ button {
 }
 
 .gameOverDiv {
-    display: flex;
-    justify-content: center;
-    /* align-items: flex-start; */
+    display: grid;
+    justify-items: center;
+    align-self: flex-start;
     /* animation: fadeIn ease-in 0.4s; */
 }
 
@@ -115,43 +90,11 @@ button {
     }
   } */
 
-#victoryMsg, #drawMsg {
-    /* display: grid; */
-    justify-content: center;
-}
-
-/* .gameOverText {
-    font-size: 2em;
-    margin-bottom: 24px;
-} */
-
 .gameOverBtn {
-    /* font-size: 1em;
-    padding: 8px 12px; */
-    width: max-content;
-    height: min-content;
-    justify-self: center;
-    align-self: center;
     border-radius: 6%;
     background: #222222;
     color: #dddddd;
 }
-
-/* Old QUERIES
-
-min-height: 1100px
-min-height: 800px
-
-min-width: 1400px
-
-<default between 1000-1400px>
-
-max-width: 1000px --> LAPTOP LAYOUT
-max-width: 800px  --> PLAYERS GO VERTICAL, GAMEOVER GO UNDER
-max-width: 540px  --> MOBILE VIEW
-max-width: 420px
-max-width: 380px
-*/
 
 /* MINMAX() CANDIDATES
 
@@ -191,11 +134,72 @@ max-width: 380px
 }
 */
 
-@media only screen and (min-width: 2560px) {}
+@media only screen and (min-width: 320px) {
+    #container {
+        grid-template-rows: auto 1fr auto 1fr;
+        grid-template-areas:
+            "header"
+            "players"
+            "board"
+            "gameOver";
+    }
+    #header {
+        padding: 12px 0;
+        box-shadow: 0 -5px 10px black;
+    }
+    #title {
+        font-size: 1.25em;
+    }
+    #playersDiv {
+        grid-area: players;
+    }
+    #player1, #player2 {
+        font-size: 1em;
+    }
+    .playerName {
+        font-size: 1.4em;
+    }
+    .playerLevel {
+        margin-bottom: 6px;
+        font-size: 0.9em;
+    }
+    .playerRecord {
+        font-size: 0.8em;
+    }
+    #board {
+        grid-area: board;
+        grid-gap: .25em;
+    }
+    #board > button {
+        font-size: 1.56em;
+    }
+    .gameOverDiv {
+        align-self: center;
+        font-size: 1em;
+    }
+    .gameOverText {
+        font-size: 1.5em;
+        margin-bottom: 12px;
+    }
+    .gameOverBtn {
+        font-size: 1em;
+        padding: 8px 12px;
+    }
+}
 
-@media only screen and (min-width: 1440px) {}
+@media only screen and (min-width: 375px) {
+    #player1, #player2 {
+        font-size: 1.1em;
+    }
+}
 
-@media only screen and (min-width: 1024px) {
+@media only screen and (min-width: 425px) {
+    #player1, #player2 {
+        font-size: 1.2em;
+    }
+}
+
+@media only screen and (min-width: 768px) {
     #container {
         grid-template-rows: auto 1fr 1fr;
         grid-template-columns: 1fr 1fr;
@@ -204,49 +208,126 @@ max-width: 380px
         grid-column: 1/3;
     }
     #title {
-        font-size: 3em;
+        font-size: 1.8em;
     }
     #playersDiv {
         grid-column: 2/3;
+        grid-row: 2/3;
     }
     #player1, #player2 {
-        padding: 48px 36px 12px;
-        font-size: 1.2em;
+        font-size: 0.9em;
     }
     .playerName {
-        font-size: 1.8em;
+        font-size: 2em;
     }
     .playerLevel {
         margin-bottom: 6px;
         font-size: 1.25em;
     }
-    /* .playerRecord {
+    .playerRecord {
         font-size: 1em;
-    } */
+    }
     #board {
         grid-column: 1/2;
         grid-row: 2/4;
+        grid-gap: 5px;
     }
     #board > button {
-        font-size: 2.4em;
+        font-size: 2em;
         width: 14vw; height: 14vw;
     }
+    .gameOverDiv {
+        grid-column: 2/3;
+        grid-row: 3/4;
+        align-self: flex-start;
+        font-size: 1em;
+    }
     .gameOverText {
-        font-size: 2em;
-        margin-bottom: 24px;
+        font-size: 1.8em;
+        margin-bottom: 18px;
     }
     .gameOverBtn {
         font-size: 1em;
         padding: 8px 12px;
-        /* width: max-content;
-        height: min-content; */
     }
 }
 
-@media only screen and (min-width: 768px) {}
+@media only screen and (min-width: 1024px) {
+    #header {
+        padding: 16px 0;
+        box-shadow: 0 -5px 15px black;
+    }
+    #title {
+        font-size: 2em;
+    }
+    #player1, #player2 {
+        font-size: 1.2em;
+    }
+    #board {
+        grid-gap: 6px;
+    }
+    #board > button {
+        font-size: 2.4em;
+    }
+    .gameOverDiv {
+        font-size: 1.25em;
+    }
+}
 
-@media only screen and (min-width: 425px) {}
+@media only screen and (min-width: 1440px) {
+    #header {
+        padding: 20px 0;
+    }
+    #title {
+        font-size: 2.6em;
+    }
+    #player1, #player2 {
+        font-size: 1.56em;
+    }
+    #board {
+        grid-gap: 8px;
+    }
+    #board > button {
+        font-size: 3.4em;
+        width: 13vw; height: 13vw;
+    }
+    .gameOverDiv {
+        font-size: 1.8em;
+    }
+    .gameOverText {
+        margin-bottom: 30px;
+    }
+    .gameOverBtn {
+        font-size: 1.1em;
+        padding: 12px 18px;
+    }
+}
 
-@media only screen and (min-width: 375px) {}
-
-@media only screen and (min-width: 320px) {}
+@media only screen and (min-width: 2560px) {
+    #header {
+        padding: 24px 0;
+        box-shadow: 0 -5px 20px black;
+    }
+    #title {
+        font-size: 6em;
+    }
+    #player1, #player2 {
+        font-size: 2.8em;
+    }
+    #board {
+        grid-gap: 12px;
+    }
+    #board > button {
+        font-size: 6em;
+        width: 14vw; height: 14vw;
+    }
+    .gameOverDiv {
+        font-size: 3.2em;
+    }
+    .gameOverText {
+        margin-bottom: 72px;
+    }
+    .gameOverBtn {
+        padding: 24px 54px;
+    }
+}

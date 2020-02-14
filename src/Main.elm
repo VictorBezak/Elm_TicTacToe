@@ -143,19 +143,15 @@ viewGameOverMessage game =
             section [] []
     
         Draw ->
-            div [ class "gameOverDiv" ]
-                [ section [ id "drawMsg" ]
-                    [ p [ class "gameOverText" ] [ text "It's a draw!" ]
-                    , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
-                    ]
+            div [ id "drawMsg", class "gameOverDiv" ]
+                [ p [ class "gameOverText" ] [ text "It's a draw!" ]
+                , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
                 ]
         
         Victory ->
-            div [ class "gameOverDiv" ]
-                [ section [ id "victoryMsg" ]
-                    [ p [ class "gameOverText" ] [ text (viewActivePlayer game ++ " won the game!") ]
-                    , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
-                    ]
+            div [ id "victoryMsg", class "gameOverDiv" ]
+                [ p [ class "gameOverText" ] [ text (viewActivePlayer game ++ " won the game!") ]
+                , button [ onClick ResetGame, class "gameOverBtn" ] [ text "Play Again?" ]
                 ]
 
 
